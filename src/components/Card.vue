@@ -1,29 +1,48 @@
 <template>
-    <div class="card-container" @click="toggleFlip">
-      <div :class="['card', isFlipped ? 'flipped' : '']">
-        <!-- Frente da Carta -->
-        <div class="card-front flex justify-center items-center">
-          <h1 class="text-4xl font-bold text-white">{{ frontContent }}</h1>
+  <div
+    class="w-60 h-80 text-white rounded-lg shadow-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2 scale-105"
+    @click="toggleFlip"
+    :class="!canFlip ? 'pointer-events-none opacity-50' : ''"
+  >
+    <div class="relative w-full h-full rounded-lg transform-style-preserve-3d transition-transform duration-500 ease-in-out" :class="isFlipped ? 'rotate-y-180' : ''">
+      <!-- Frente da Carta -->
+      <div class="absolute w-full h-full bg-[#1e1e1e] rounded-lg backface-hidden flex flex-col justify-center items-center">
+        <span class="absolute top-2 right-2 text-lg font-bold">{{ cardNumber }}</span>
+        <span class="absolute bottom-2 left-2 text-lg font-bold">{{ cardNumber }}</span>
+        <div class="w-32 h-16 flex justify-center items-center">
+          <img src="../assets/logo.svg" alt="Logo Azion" class="w-full h-full" />
         </div>
-  
-        <!-- Verso da Carta -->
-        <div class="card-back flex justify-center items-center">
-          <p class="text-xl font-medium text-white">{{ backContent }}</p>
+      </div>
+
+      <!-- Verso da Carta -->
+      <div class="absolute w-full h-full bg-[#1e1e1e] rounded-lg transform rotate-y-180 backface-hidden flex justify-center items-center">
+        <div class="p-4 flex flex-col items-center">
+          <p class="text-xl font-medium text-white mb-4 text-center">{{ backContent }}</p>
+          <img :src="backImage" alt="Back Image" class="w-32 h-32 object-cover rounded-lg" />
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
 
 <script>
 export default {
   props: {
-    frontContent: {
-      type: String,
-      default: 'Front'
+    cardNumber: {
+      type: Number,
+      default: 1
     },
     backContent: {
       type: String,
-      default: 'Back'
+      default: 'Conteúdo'
+    },
+    backImage: {
+      type: String,
+      default: ''
+    },
+    canFlip: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -33,52 +52,32 @@ export default {
   },
   methods: {
     toggleFlip() {
-      this.isFlipped = !this.isFlipped;
+      if (this.canFlip) {
+        this.isFlipped = !this.isFlipped;
+      }
     }
   }
 };
 </script>
-  
-  <style scoped>
-  .card-container {
-    perspective: 1000px;
-    width: 300px;
-    height: 400px;
-    margin: 20px;
-  }
-  
-  .card {
-    width: 100%;
-    height: 100%;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-    position: relative;
-    cursor: pointer;
-  }
-  
-  .card.flipped {
-    transform: rotateY(180deg);
-  }
-  
-  .card-front,
-  .card-back {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    backface-visibility: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px;
-  }
-  
-  .card-front {
-    background: linear-gradient(135deg, #007cf0 0%, #00dfd8 100%);
-  }
-  
-  .card-back {
-    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-    transform: rotateY(180deg);
-  }
-  </style>
-  
+
+<style scoped>
+.perspective {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.card {
+  transition: transform 0.6s;
+}
+</style>
