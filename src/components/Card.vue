@@ -2,7 +2,7 @@
   <div
     class="w-60 h-80 text-white rounded-lg shadow-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2 scale-105"
     @click="toggleFlip"
-    :class="!canFlip ? 'pointer-events-none opacity-50' : ''"
+    :class="!canFlip ? 'pointer-events-none' : ''"
   >
     <div class="relative w-full h-full rounded-lg transform-style-preserve-3d transition-transform duration-500 ease-in-out" :class="isFlipped ? 'rotate-y-180' : ''">
       <!-- Frente da Carta -->
@@ -15,11 +15,9 @@
       </div>
 
       <!-- Verso da Carta -->
-      <div class="absolute w-full h-full bg-[#1e1e1e] rounded-lg transform rotate-y-180 backface-hidden flex justify-center items-center">
-        <div class="p-4 flex flex-col items-center">
-          <p class="text-xl font-medium text-white mb-4 text-center">{{ backContent }}</p>
-          <img :src="backImage" alt="Back Image" class="w-32 h-32 object-cover rounded-lg" />
-        </div>
+      <div class="absolute w-full h-full bg-[#1e1e1e] rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-center items-center">
+        <p class="text-xl font-medium text-white mb-4 text-center">{{ backContent }}</p>
+        <img :src="backImage" alt="Imagem do Conteúdo" class="w-32 h-32 object-cover rounded-lg" />
       </div>
     </div>
   </div>
@@ -43,17 +41,16 @@ export default {
     canFlip: {
       type: Boolean,
       default: true
+    },
+    isFlipped: {
+      type: Boolean,
+      default: false
     }
-  },
-  data() {
-    return {
-      isFlipped: false
-    };
   },
   methods: {
     toggleFlip() {
       if (this.canFlip) {
-        this.isFlipped = !this.isFlipped;
+        this.$emit('flip-card'); // Emite um evento para notificar o componente pai
       }
     }
   }

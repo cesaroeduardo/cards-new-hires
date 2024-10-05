@@ -40,10 +40,10 @@ export default {
       const sessionCode = this.generateSessionCode();
 
       try {
-        // Insere a nova sessão na tabela `sessions`
+        // Insere a nova sessão na tabela `sessions` sem `current_user`
         const { data: sessionData, error: sessionError } = await supabase
           .from('sessions')
-          .insert([{ id: sessionId, creator_id: this.userName.trim(), session_code: sessionCode, current_user: this.userName.trim() }])
+          .insert([{ id: sessionId, creator_id: this.userName.trim(), session_code: sessionCode }])
           .select();
 
         if (sessionError || sessionData.length === 0) {

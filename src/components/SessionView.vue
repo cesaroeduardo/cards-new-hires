@@ -6,13 +6,11 @@
       <button @click="saveUserName" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
         Entrar na Sessão
       </button>
+      <div v-if="message" class="text-red-500 mt-4">{{ message }}</div>
     </div>
 
     <div v-else>
-      <h3 class="text-2xl font-semibold mb-4">Turno de: <span class="text-blue-600">{{ currentUser }}</span></h3>
-      <h3 class="text-2xl font-semibold mb-4">Round Atual: {{ currentRound }}</h3>
-      <p v-if="isCurrentUser" class="bg-green-200 p-2 rounded-lg">É o seu turno de virar uma carta!</p>
-      <p v-else class="bg-red-200 p-2 rounded-lg">É o turno de {{ currentUser }}. Aguarde seu turno para virar uma carta.</p>
+      <h3 class="text-2xl font-semibold mb-4">Bem-vindo, <span class="text-blue-600">{{ userName }}</span></h3>
 
       <button v-if="isCreator" @click="endSession" class="mt-6 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition">
         Encerrar Sessão
@@ -21,20 +19,22 @@
       <!-- Lista de usuários conectados -->
       <ul class="bg-gray-100 rounded-lg p-4 my-4">
         <h2 class="text-xl font-semibold mb-2">Usuários Conectados:</h2>
-        <li v-for="user in connectedUsers" :key="user.id" :class="{'font-bold': user.name === currentUser}">
+        <li v-for="user in connectedUsers" :key="user.id">
           {{ user.name }} <span v-if="user.name === creatorId">(Criador)</span>
         </li>
       </ul>
 
-      <!-- Container para exibir as cartas lado a lado -->
+      <!-- Container para exibir as cartas -->
       <div class="flex justify-center flex-wrap gap-4 mt-10">
         <Card
           v-for="(card, index) in cards"
           :key="index"
-          :title="card.title"
-          :content="card.content"
-          :image="card.image"
-          :cardNumber="index + 1"
+          :cardNumber="card.number"
+          :backContent="card.backContent"
+          :backImage="card.backImage"
+          :canFlip="!card.flipped"
+          :isFlipped="card.flipped"
+          @flip-card="flipCard(index)"
         />
       </div>
     </div>
@@ -43,39 +43,28 @@
 
 <script>
 import Card from './Card.vue';
-import UserList from './UserList.vue';
-import cardsData from '../data/cards.json';
 import { supabase } from '../utils/supabase';
+import cardsData from '../data/cards.json';
 
 export default {
-  components: {
-    Card,
-    UserList
-  },
+  components: { Card },
   data() {
     return {
-      cards: cardsData.contentCards || [],
+      cards: cardsData.map(card => ({ ...card, flipped: false })),
       sessionCode: '',
-      currentRound: 1,
       userName: null,
-      userNameInput: '',  // Input temporário para o nome do usuário
-      currentUser: '',
+      userNameInput: '',
       isCreator: false,
-      isCurrentUser: false,
       sessionId: '',
-      creatorId: '',  // ID do criador da sessão
-      turnIndex: 0,  // Índice do turno atual
+      creatorId: '',
       connectedUsers: [],
-      cards: []
+      message: ''
     };
   },
   async created() {
     this.sessionCode = this.$route.params.sessionCode;
     this.userName = localStorage.getItem(`userName-${this.sessionCode}`);
     this.sessionId = localStorage.getItem(`sessionId-${this.sessionCode}`);
-
-    // Carregar as cartas do arquivo JSON externo
-    this.cards = cardsData;
 
     if (this.userName && this.sessionId) {
       await this.joinSession();
@@ -84,11 +73,12 @@ export default {
   methods: {
     async saveUserName() {
       if (!this.userNameInput.trim()) {
-        alert('Por favor, insira um nome válido.');
+        this.message = 'Por favor, insira um nome válido.';
         return;
       }
       this.userName = this.userNameInput.trim();
       localStorage.setItem(`userName-${this.sessionCode}`, this.userName);
+      this.message = '';
       await this.joinSession();
     },
     async joinSession() {
@@ -96,9 +86,10 @@ export default {
         let sessionId = localStorage.getItem(`sessionId-${this.sessionCode}`);
 
         if (!sessionId) {
+          // Obtém a sessão usando `session_code` e remove `current_user`
           const { data, error } = await supabase
             .from('sessions')
-            .select('*')
+            .select('id, creator_id')
             .eq('session_code', this.sessionCode.trim())
             .single();
 
@@ -113,26 +104,37 @@ export default {
         }
 
         this.sessionId = sessionId;
-        this.creatorId = (await supabase.from('sessions').select('creator_id').eq('id', this.sessionId).single()).data.creator_id;
 
-        const userExists = await supabase
+        // Carregar o criador da sessão sem a coluna `current_user`
+        const { data: sessionData } = await supabase
+          .from('sessions')
+          .select('creator_id')
+          .eq('id', this.sessionId)
+          .single();
+
+        this.creatorId = sessionData.creator_id;
+
+        // Verificar se o usuário já está registrado na sessão
+        const { data: existingUser } = await supabase
           .from('users')
-          .select('*')
+          .select('id')
           .eq('session_id', this.sessionId)
           .eq('name', this.userName)
           .single();
 
-        if (!userExists.data) {
+        if (!existingUser) {
           await supabase
             .from('users')
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
         await this.loadConnectedUsers();
+        this.isCreator = this.userName === this.creatorId;
+
         this.subscribeToChanges();
       } catch (error) {
-        console.error('Erro inesperado ao entrar na sessão:', error.message);
-        this.message = `Erro inesperado ao entrar na sessão: ${error.message}`;
+        console.error('Erro ao entrar na sessão:', error.message);
+        this.message = `Erro ao entrar na sessão: ${error.message}`;
       }
     },
     async loadConnectedUsers() {
@@ -148,45 +150,13 @@ export default {
       }
     },
     async flipCard(index) {
-      if (!this.isCurrentUser || this.cards[index].flipped) return;
+      if (this.cards[index].flipped) return;
 
       this.cards[index].flipped = true;
-
-      const { error } = await supabase
+      await supabase
         .from('sessions')
         .update({ [`card_${index}_flipped`]: true })
         .eq('id', this.sessionId);
-
-      if (!error) {
-        this.nextRound();
-      }
-    },
-    async nextRound() {
-      const { data: users, error: usersError } = await supabase
-        .from('users')
-        .select('name')
-        .eq('session_id', this.sessionId);
-
-      if (usersError) {
-        console.error('Erro ao carregar usuários:', usersError.message);
-        return;
-      }
-
-      this.turnIndex = (this.turnIndex + 1) % users.length;
-      const nextUser = users[this.turnIndex].name;
-
-      const { error: roundError } = await supabase
-        .from('sessions')
-        .update({ current_round: this.currentRound + 1, current_user: nextUser, turn_index: this.turnIndex })
-        .eq('id', this.sessionId);
-
-      if (roundError) {
-        console.error('Erro ao atualizar o round:', roundError.message);
-      } else {
-        this.currentRound += 1;
-        this.currentUser = nextUser;
-        this.isCurrentUser = this.userName === this.currentUser;
-      }
     },
     subscribeToChanges() {
       const sessionChannel = supabase
@@ -195,11 +165,6 @@ export default {
           'postgres_changes',
           { event: 'UPDATE', schema: 'public', table: 'sessions', filter: `id=eq.${this.sessionId}` },
           (payload) => {
-            this.currentRound = payload.new.current_round;
-            this.currentUser = payload.new.current_user;
-            this.turnIndex = payload.new.turn_index;
-            this.isCurrentUser = this.userName === this.currentUser;
-
             this.cards.forEach((card, index) => {
               if (payload.new[`card_${index}_flipped`] !== undefined) {
                 this.cards[index].flipped = payload.new[`card_${index}_flipped`];
@@ -207,9 +172,33 @@ export default {
             });
           }
         )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          (payload) => {
+            if (!this.connectedUsers.find(user => user.id === payload.new.id)) {
+              this.connectedUsers.push(payload.new);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'DELETE', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          (payload) => {
+            this.connectedUsers = this.connectedUsers.filter(user => user.id !== payload.old.id);
+          }
+        )
         .subscribe();
 
       this.subscription = [sessionChannel];
+    },
+    async endSession() {
+      await supabase
+        .from('sessions')
+        .delete()
+        .eq('id', this.sessionId);
+
+      this.message = 'Sessão encerrada.';
     }
   }
 };
