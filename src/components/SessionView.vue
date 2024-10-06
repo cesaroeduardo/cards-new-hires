@@ -1,17 +1,17 @@
 <template>
   <div class="container mx-auto py-8">
-    <div v-if="!userName" class="flex flex-col items-center">
-      <h2 class="text-3xl font-bold mb-4">
+    <div v-if="!userName" class="flex flex-col items-center gap-5">
+      <h2 class="text-3xl font-bold text-black dark:text-white">
         Digite seu nome para entrar na sessão
       </h2>
       <input
         v-model="userNameInput"
         placeholder="Seu nome"
-        class="border p-2 rounded-lg mb-4"
+        class="border p-2 rounded-lg"
       />
       <button
         @click="saveUserName"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+        class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition"
       >
         Entrar na Sessão
       </button>
@@ -19,8 +19,8 @@
     </div>
 
     <div v-else>
-      <h3 class="text-2xl font-semibold mb-4">
-        Bem-vindo, <span class="text-blue-600">{{ userName }}</span>
+      <h3 class="text-2xl font-semibold mb-4 text-black dark:text-white">
+        Bem-vindo, <span class="text-orange-600">{{ userName }}</span>
       </h3>
 
       <!-- <button
@@ -44,6 +44,7 @@
           v-for="(card, index) in cards"
           :key="index"
           :cardNumber="card.number"
+          :backTitle="card.backTitle"
           :backContent="card.backContent"
           :backImage="card.backImage"
           :canFlip="!card.flipped"

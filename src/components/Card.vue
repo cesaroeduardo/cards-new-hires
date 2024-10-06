@@ -10,12 +10,12 @@
     >
       <!-- Frente da Carta -->
       <div
-        class="absolute w-full h-full bg-[#1e1e1e] rounded-lg backface-hidden flex flex-col justify-center items-center"
+        class="absolute w-full h-full bg-[#1e1e1e] dark:bg-white/5 border border-[#1c1c1c] dark:border-white/10 rounded-lg backface-hidden flex flex-col justify-center items-center"
       >
-        <span class="absolute top-2 right-2 text-lg font-bold">{{
+        <span class="absolute top-2 right-2 text-lg font-medium opacity-50">{{
           cardNumber
         }}</span>
-        <span class="absolute bottom-2 left-2 text-lg font-bold">{{
+        <span class="absolute bottom-2 left-2 text-lg font-medium opacity-50">{{
           cardNumber
         }}</span>
         <div class="w-32 h-16 flex justify-center items-center">
@@ -29,16 +29,23 @@
 
       <!-- Verso da Carta -->
       <div
-        class="absolute w-full h-full bg-[#1e1e1e] rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-center items-center"
+        class="absolute w-full h-full bg-white dark:bg-white/5 overflow-hidden border border-[#1c1c1c] dark:border-white/10 rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-start items-center gap-3"
       >
-        <p class="text-xl font-medium text-white mb-4 text-center">
-          {{ backContent }}
-        </p>
         <img
           :src="backImage"
           alt="Imagem do Conteúdo"
-          class="w-32 h-32 object-cover rounded-lg"
+          class="w-full max-h-32 object-cover"
         />
+        <div
+          class="flex flex-col justify-center h-full items-center px-3 text-balance gap-0"
+        >
+          <span class="text-md font-medium text-white mb-4 text-center">
+            {{ backTitle }}
+          </span>
+          <p class="text-sm text-white mb-4 text-center">
+            {{ backContent }}
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -50,6 +57,10 @@ export default {
     cardNumber: {
       type: Number,
       default: 1,
+    },
+    backTitle: {
+      type: String,
+      default: 'Título',
     },
     backContent: {
       type: String,

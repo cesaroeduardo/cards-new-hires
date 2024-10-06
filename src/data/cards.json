@@ -1,62 +1,74 @@
 [
   {
     "number": 1,
+    "backTitle": "História da Azion",
     "backContent": "História da Azion: O começo. Apresentar como a Azion foi fundada e o que motivou seu crescimento ao longo dos anos.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 2,
-    "backContent": "Origem do nome Azion: Azion vem do italiano 'azione', que significa ação.",
+    "backTitle": "Origem do nome Azion",
+    "backContent": "Azion vem do italiano 'azione', que significa ação.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 3,
-    "backContent": "O Primeiro Azion - Rafael Umann: Apresentar um pouco da história do Rafael até a criação da Azion.",
+    "backTitle": "O Primeiro Azion",
+    "backContent": "Rafael Umann: Apresentar um pouco da história do Rafael até a criação da Azion.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 4,
-    "backContent": "Valores da Azion: Innovation, Ownership, Quality and Agility.",
+    "backTitle": "Valores da Azion",
+    "backContent": "Innovation, Ownership, Quality and Agility.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 5,
-    "backContent": "EVP (Employee Value Proposition): Apresentar o que a Azion oferece em termos de crescimento, cultura e benefícios para os colaboradores.",
+    "backTitle": "EVP (Employee Value Proposition)",
+    "backContent": "Apresentar o que a Azion oferece em termos de crescimento, cultura e benefícios para os colaboradores.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 6,
-    "backContent": "Seu Buddy na Azion: Apresentar o sistema de Buddy, quem é o Buddy no NH e como ele irá apoiar durante o onboarding.",
+    "backTitle": "Seu Buddy na Azion",
+    "backContent": "Apresentar o sistema de Buddy, quem é o Buddy no NH e como ele irá apoiar durante o onboarding.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 7,
-    "backContent": "Departamentos Azion: Apresentação breve dos 8 departamentos da Azion e do C-level/diretoria de cada uma delas.",
+    "backTitle": "Departamentos Azion",
+    "backContent": "Apresentação breve dos 8 departamentos da Azion e do C-level/diretoria de cada uma delas.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 8,
-    "backContent": "Período de Experiência: Explicação sobre as avaliações de período de experiência na Qulture e das expectativas para as primeiras semanas.",
+    "backTitle": "Período de Experiência",
+    "backContent": "Explicação sobre as avaliações de período de experiência na Qulture e das expectativas para as primeiras semanas.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 9,
-    "backContent": "Dia a dia na Azion: Flexibilidade de horário, Dresscode, Cake Boss, Celebrações, Eventos.",
+    "backTitle": "Dia a dia na Azion",
+    "backContent": "Flexibilidade de horário, Dresscode, Cake Boss, Celebrações, Eventos.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 10,
-    "backContent": "Benefícios Culturais: Referral Program, Birthday day off, Freestyle and Language Incentive.",
+    "backTitle": "Benefícios Culturais",
+    "backContent": "Referral Program, Birthday day off, Freestyle and Language Incentive.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 11,
-    "backContent": "Qulture: Explicar sobre a importância e funcionalidades da nossa plataforma de gestão de pessoas.",
+    "backTitle": "Qulture",
+    "backContent": "Explicar sobre a importância e funcionalidades da nossa plataforma de gestão de pessoas.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   },
   {
     "number": 12,
-    "backContent": "Carta Coringa: Que tal um Icebreaker? Compartilhe uma curiosidade sobre você.",
+    "backTitle": "Carta Coringa",
+    "backContent": "Que tal um Icebreaker? Compartilhe uma curiosidade sobre você.",
     "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
   }
 ]

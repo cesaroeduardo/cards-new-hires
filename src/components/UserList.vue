@@ -11,7 +11,7 @@
       />
       <button
         @click="saveUserName"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+        class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition"
       >
         Entrar na Sessão
       </button>
@@ -20,7 +20,7 @@
 
     <div v-else>
       <h3 class="text-2xl font-semibold mb-4">
-        Bem-vindo, <span class="text-blue-600">{{ userName }}</span>
+        Bem-vindo, <span class="text-orange-600">{{ userName }}</span>
       </h3>
 
       <button
