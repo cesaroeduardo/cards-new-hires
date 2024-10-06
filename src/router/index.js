@@ -4,9 +4,17 @@ import HomeView from '../components/HomeView.vue';
 import SessionView from '../components/SessionView.vue';
 
 const routes = [
-    { path: '/', name: 'HomeView', component: HomeView },
-    { path: '/session/:sessionCode', name: 'SessionView', component: SessionView }
-];  
+  {
+    path: '/',
+    name: 'HomeView',
+    component: HomeView,
+  },
+  {
+    path: '/session/:sessionCode',
+    name: 'SessionView',
+    component: SessionView,
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),

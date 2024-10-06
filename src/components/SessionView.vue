@@ -1,18 +1,33 @@
 <template>
   <div class="container mx-auto py-8">
     <div v-if="!userName" class="flex flex-col items-center">
-      <h2 class="text-3xl font-bold mb-4">Digite seu nome para entrar na sessão</h2>
-      <input v-model="userNameInput" placeholder="Seu nome" class="border p-2 rounded-lg mb-4" />
-      <button @click="saveUserName" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+      <h2 class="text-3xl font-bold mb-4">
+        Digite seu nome para entrar na sessão
+      </h2>
+      <input
+        v-model="userNameInput"
+        placeholder="Seu nome"
+        class="border p-2 rounded-lg mb-4"
+      />
+      <button
+        @click="saveUserName"
+        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+      >
         Entrar na Sessão
       </button>
       <div v-if="message" class="text-red-500 mt-4">{{ message }}</div>
     </div>
 
     <div v-else>
-      <h3 class="text-2xl font-semibold mb-4">Bem-vindo, <span class="text-blue-600">{{ userName }}</span></h3>
+      <h3 class="text-2xl font-semibold mb-4">
+        Bem-vindo, <span class="text-blue-600">{{ userName }}</span>
+      </h3>
 
-      <button v-if="isCreator" @click="endSession" class="mt-6 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition">
+      <button
+        v-if="isCreator"
+        @click="endSession"
+        class="mt-6 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+      >
         Encerrar Sessão
       </button>
 
@@ -50,7 +65,7 @@ export default {
   components: { Card },
   data() {
     return {
-      cards: cardsData.map(card => ({ ...card, flipped: false })),
+      cards: cardsData.map((card) => ({ ...card, flipped: false })),
       sessionCode: '',
       userName: null,
       userNameInput: '',
@@ -58,14 +73,14 @@ export default {
       sessionId: '',
       creatorId: '',
       connectedUsers: [],
-      message: ''
+      message: '',
     };
   },
   async created() {
     this.sessionCode = this.$route.params.sessionCode;
     this.userName = localStorage.getItem(`userName-${this.sessionCode}`);
     this.sessionId = localStorage.getItem(`sessionId-${this.sessionCode}`);
-    console.log("sessionId após carregar do localStorage:", this.sessionId);
+    console.log('sessionId após carregar do localStorage:', this.sessionId);
 
     if (this.userName && this.sessionId) {
       await this.joinSession();
@@ -74,7 +89,9 @@ export default {
   methods: {
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find(c => c.cardNumber === card.number);
+        const cardState = flippedCards.find(
+          (c) => c.cardNumber === card.number
+        );
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -92,11 +109,10 @@ export default {
     },
     async joinSession() {
       try {
-        // Tenta buscar o sessionId do localStorage com base no sessionCode
+        // Passo 1: Tentar obter sessionId do localStorage
         let sessionId = localStorage.getItem(`sessionId-${this.sessionCode}`);
-
-        // Caso não encontre, busca no Supabase com base no sessionCode
         if (!sessionId) {
+          // Passo 2: Se não existir, buscar no Supabase usando o sessionCode
           const { data, error } = await supabase
             .from('sessions')
             .select('id, flipped_cards')
@@ -104,31 +120,29 @@ export default {
             .single();
 
           if (error || !data) {
-            console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
-            this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
+            console.error(
+              'Sessão não encontrada:',
+              error ? error.message : 'Código inválido'
+            );
+            this.message =
+              'Sessão não encontrada. Verifique o código e tente novamente.';
             return;
           }
 
+          // Passo 3: Armazenar sessionId no localStorage
           sessionId = data.id;
           localStorage.setItem(`sessionId-${this.sessionCode}`, sessionId);
 
-          // Se o estado das cartas está salvo no Supabase, carrega-o
+          // Passo 4: Aplicar o estado das cartas armazenado no Supabase
           if (data.flipped_cards) {
             this.applyFlippedCards(data.flipped_cards);
           }
         }
 
-        // Atribui o sessionId ao estado da instância e verifica se está correto
         this.sessionId = sessionId;
-        console.log("Session ID recuperado com sucesso:", this.sessionId);
+        console.log('Session ID carregado com sucesso:', this.sessionId);
 
-        if (!this.sessionId) {
-          console.error('Erro: sessionId não foi definido corretamente após recuperação!');
-          this.message = 'Erro ao recuperar a sessão. Por favor, recarregue a página e tente novamente.';
-          return;
-        }
-
-        // Carregar os estados das cartas do Supabase
+        // Passo 5: Recuperar e aplicar o estado das cartas da sessão
         const { data: sessionData, error: sessionError } = await supabase
           .from('sessions')
           .select('flipped_cards')
@@ -136,12 +150,15 @@ export default {
           .single();
 
         if (sessionError) {
-          console.error('Erro ao carregar o estado das cartas:', sessionError.message);
+          console.error(
+            'Erro ao carregar o estado das cartas:',
+            sessionError.message
+          );
         } else if (sessionData.flipped_cards) {
           this.applyFlippedCards(sessionData.flipped_cards);
         }
 
-        // Verifica se o usuário já está registrado na sessão
+        // Passo 6: Verificar se o usuário já está registrado
         const { data: existingUser } = await supabase
           .from('users')
           .select('id')
@@ -155,16 +172,13 @@ export default {
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
-        // Carrega os usuários conectados
+        // Passo 7: Carregar usuários conectados e inscrever-se para mudanças
         await this.loadConnectedUsers();
-
-        // Inscreve-se para mudanças em tempo real
         this.subscribeToChanges();
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
       }
-      console.log("Session ID ao se inscrever nos canais:", this.sessionId);
     },
 
     async loadConnectedUsers() {
@@ -184,12 +198,12 @@ export default {
 
       this.cards[index].flipped = !this.cards[index].flipped;
 
-      const updatedFlippedCards = this.cards.map(card => ({
+      const updatedFlippedCards = this.cards.map((card) => ({
         cardNumber: card.number,
-        isFlipped: card.flipped
+        isFlipped: card.flipped,
       }));
 
-      console.log("Session ID antes de atualizar a carta:", this.sessionId); // Verificação crítica
+      console.log('Session ID antes de atualizar a carta:', this.sessionId); // Verificação crítica
 
       if (!this.sessionId) {
         console.error('Erro: sessionId não está definido!');
@@ -220,13 +234,14 @@ export default {
             event: 'UPDATE',
             schema: 'public',
             table: 'sessions',
-            filter: `id=eq.${this.sessionId}`
+            filter: `id=eq.${this.sessionId}`,
           },
           (payload) => {
             // Atualiza as cartas conforme os valores recebidos em tempo real
             this.cards.forEach((card, index) => {
               if (payload.new[`card_${index}_flipped`] !== undefined) {
-                this.cards[index].flipped = payload.new[`card_${index}_flipped`];
+                this.cards[index].flipped =
+                  payload.new[`card_${index}_flipped`];
               }
             });
           }
@@ -236,13 +251,10 @@ export default {
       this.subscription = [sessionChannel];
     },
     async endSession() {
-      await supabase
-        .from('sessions')
-        .delete()
-        .eq('id', this.sessionId);
+      await supabase.from('sessions').delete().eq('id', this.sessionId);
 
       this.message = 'Sessão encerrada.';
-    }
-  }
+    },
+  },
 };
 </script>
