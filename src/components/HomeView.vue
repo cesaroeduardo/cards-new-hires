@@ -1,13 +1,16 @@
 <template>
-  <div class="container mx-auto py-8">
-    <h1 class="text-4xl font-bold text-center mb-8">Cards New Hires</h1>
+  <div
+    class="container mx-auto py-8 gap-4 text-black dark:text-white flex flex-col justify-center max-w-[480px]"
+  >
+    <h1 class="text-4xl font-bold text-center">Cards New Hires</h1>
     <p class="text-center mb-4">
-      Crie ou entre em uma sessão existente para conhecer os novos contratados!
+      Crie uma sessão para iniciar a dinâmica, após, compartilhe o link da
+      sessão criada com os convidados!
     </p>
     <div class="flex justify-center">
       <button
         @click="createSession"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+        class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition"
       >
         Criar Nova Sessão
       </button>
