@@ -93,15 +93,26 @@ export default {
     },
     async joinSession() {
       try {
+        // Buscar a sessão no Supabase usando o sessionCode
         const { data, error } = await supabase
           .from('sessions')
-          .select('id, flipped_cards')
+          .select('id, flipped_cards, expires_at')
           .eq('session_code', this.sessionCode.trim())
           .single();
 
         if (error || !data) {
           console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
           this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
+          return;
+        }
+
+        // Verificar se a sessão expirou
+        const now = new Date();
+        const expiresAt = new Date(data.expires_at);
+
+        if (expiresAt < now) {
+          console.warn('Sessão expirada.');
+          this.message = 'Esta sessão expirou. Por favor, crie uma nova sessão.';
           return;
         }
 
@@ -126,7 +137,7 @@ export default {
 
         await this.loadConnectedUsers();
         this.subscribeToCardUpdates();
-        this.subscribeToUserUpdates(); // Inscrição para mudanças na lista de usuários
+        this.subscribeToUserUpdates();
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
