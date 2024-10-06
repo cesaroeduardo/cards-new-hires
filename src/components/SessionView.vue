@@ -21,17 +21,30 @@
 
     <!-- Tela da sessão -->
     <div v-else class="flex justify-center items-center flex-col gap-8">
-      <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
-        Boas-vindas! <span class="text-orange-600">{{ userName }}</span>
-      </h3>
+      <div class="flex items-center gap-4">
+        <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
+          Boas-vindas <span class="text-orange-600">{{ userName }}!</span>
+        </h3>
+      </div>
 
       <!-- Lista de usuários conectados -->
       <ul
-        class="flex min-w-[360px] px-10 flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
+        class="flex min-w-[360px] flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
       >
-        <h2 class="text-[10px] font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
-          Participantes
-        </h2>
+        <div class="flex flex-row items-center w-full pl-6">
+          <h2 class="text-[10px] w-full font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
+            Participantes
+          </h2>
+          <!-- Botão de Compartilhamento -->
+          <button
+            @click="shareLink"
+            class="text-black text-[10px] dark:text-white px-2 !w-auto py-2 opacity-40 rounded-lg dark:hover:bg-white/10 transition font-medium flex items-center gap-2"
+          >
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 14 14">
+            <path fill-rule="evenodd" d="M9.706 4.923a1.763 1.763 0 1 0-1.743-1.499l-2.817 2.04a1.763 1.763 0 1 0-.006 3.089l2.827 2.002a1.763 1.763 0 1 0 .756-1.178L6 7.447a1.766 1.766 0 0 0 .002-.876l2.705-1.958c.284.195.628.31 1 .31Z"/>
+          </svg>
+          </button>
+        </div>
         <li
           v-if="connectedUsers.length > 0"
           v-for="user in connectedUsers"
@@ -223,6 +236,15 @@ export default {
           }
         )
         .subscribe();
+    },
+    async shareLink() {
+      const link = window.location.href;
+      try {
+        await navigator.clipboard.writeText(link);
+        alert('Link copiado para a área de transferência!');
+      } catch (err) {
+        console.error('Erro ao copiar o link:', err);
+      }
     },
     async endSession() {
       await supabase.from('sessions').delete().eq('id', this.sessionId);
