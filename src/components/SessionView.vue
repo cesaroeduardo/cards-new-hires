@@ -1,7 +1,9 @@
 <template>
   <div class="container mx-auto py-8">
     <div v-if="!userName" class="flex flex-col items-center">
-      <h2 class="text-3xl font-bold mb-4">Digite seu nome para entrar na sessão</h2>
+      <h2 class="text-3xl font-bold mb-4">
+        Digite seu nome para entrar na sessão
+      </h2>
       <input
         v-model="userNameInput"
         placeholder="Seu nome"
@@ -17,7 +19,9 @@
     </div>
 
     <div v-else>
-      <h3 class="text-2xl font-semibold mb-4">Bem-vindo, <span class="text-blue-600">{{ userName }}</span></h3>
+      <h3 class="text-2xl font-semibold mb-4">
+        Bem-vindo, <span class="text-blue-600">{{ userName }}</span>
+      </h3>
 
       <!-- <button
         @click="endSession"
@@ -60,7 +64,7 @@ export default {
   components: { Card },
   data() {
     return {
-      cards: cardsData.map(card => ({ ...card, flipped: false })),
+      cards: cardsData.map((card) => ({ ...card, flipped: false })),
       sessionCode: '',
       userName: null,
       userNameInput: '',
@@ -77,8 +81,10 @@ export default {
   },
   methods: {
     applyFlippedCards(flippedCards) {
-      this.cards.forEach(card => {
-        const cardState = flippedCards.find(c => c.cardNumber === card.number);
+      this.cards.forEach((card) => {
+        const cardState = flippedCards.find(
+          (c) => c.cardNumber === card.number
+        );
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -103,8 +109,12 @@ export default {
           .single();
 
         if (error || !data) {
-          console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
-          this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
+          console.error(
+            'Sessão não encontrada:',
+            error ? error.message : 'Código inválido'
+          );
+          this.message =
+            'Sessão não encontrada. Verifique o código e tente novamente.';
           return;
         }
 
@@ -154,7 +164,7 @@ export default {
 
       this.cards[index].flipped = !this.cards[index].flipped;
 
-      const updatedFlippedCards = this.cards.map(card => ({
+      const updatedFlippedCards = this.cards.map((card) => ({
         cardNumber: card.number,
         isFlipped: card.flipped,
       }));
@@ -196,7 +206,8 @@ export default {
             // Atualiza as cartas conforme os valores recebidos em tempo real
             this.cards.forEach((card, index) => {
               if (payload.new[`card_${index}_flipped`] !== undefined) {
-                this.cards[index].flipped = payload.new[`card_${index}_flipped`];
+                this.cards[index].flipped =
+                  payload.new[`card_${index}_flipped`];
               }
             });
           }

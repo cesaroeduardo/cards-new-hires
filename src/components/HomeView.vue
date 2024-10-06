@@ -1,7 +1,9 @@
 <template>
   <div class="container mx-auto py-8">
     <h1 class="text-4xl font-bold text-center mb-8">Cards New Hires</h1>
-    <p class="text-center mb-4">Crie ou entre em uma sessão existente para conhecer os novos contratados!</p>
+    <p class="text-center mb-4">
+      Crie ou entre em uma sessão existente para conhecer os novos contratados!
+    </p>
     <div class="flex justify-center">
       <button
         @click="createSession"
@@ -12,7 +14,11 @@
     </div>
 
     <!-- Feedback de erro ou sucesso -->
-    <div v-if="message" class="mt-4 text-center text-red-500" v-html="message"></div>
+    <div
+      v-if="message"
+      class="mt-4 text-center text-red-500"
+      v-html="message"
+    ></div>
   </div>
 </template>
 
