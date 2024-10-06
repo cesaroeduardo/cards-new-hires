@@ -76,9 +76,7 @@ export default {
   methods: {
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find(
-          (c) => c.cardNumber === card.number
-        );
+        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -95,7 +93,6 @@ export default {
     },
     async joinSession() {
       try {
-        // Passo 1: Buscar a sessão no Supabase usando o sessionCode
         const { data, error } = await supabase
           .from('sessions')
           .select('id, flipped_cards')
@@ -103,23 +100,17 @@ export default {
           .single();
 
         if (error || !data) {
-          console.error(
-            'Sessão não encontrada:',
-            error ? error.message : 'Código inválido'
-          );
-          this.message =
-            'Sessão não encontrada. Verifique o código e tente novamente.';
+          console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
+          this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
           return;
         }
 
         this.sessionId = data.id;
 
-        // Passo 2: Aplicar o estado das cartas armazenado no Supabase
         if (data.flipped_cards) {
           this.applyFlippedCards(data.flipped_cards);
         }
 
-        // Passo 3: Verificar se o usuário já está registrado na sessão
         const { data: existingUser } = await supabase
           .from('users')
           .select('id')
@@ -133,9 +124,9 @@ export default {
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
-        // Passo 4: Carregar usuários conectados e inscrever-se para mudanças
         await this.loadConnectedUsers();
         this.subscribeToCardUpdates();
+        this.subscribeToUserUpdates(); // Inscrição para mudanças na lista de usuários
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
@@ -197,6 +188,33 @@ export default {
           (payload) => {
             if (payload.new && payload.new.flipped_cards) {
               this.applyFlippedCards(payload.new.flipped_cards);
+            }
+          }
+        )
+        .subscribe();
+    },
+    async subscribeToUserUpdates() {
+      supabase
+        .channel(`user-updates-${this.sessionId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
+          (payload) => {
+            // Atualiza a lista de usuários conectados conforme as mudanças no banco de dados
+            if (payload.eventType === 'INSERT') {
+              this.connectedUsers.push(payload.new);
+            } else if (payload.eventType === 'DELETE') {
+              this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
+            } else if (payload.eventType === 'UPDATE') {
+              const userIndex = this.connectedUsers.findIndex((user) => user.id === payload.new.id);
+              if (userIndex !== -1) {
+                this.connectedUsers.splice(userIndex, 1, payload.new);
+              }
             }
           }
         )
