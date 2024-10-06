@@ -10,21 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '14'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
-      - name: Build the project
+      - name: Build Project
         run: npm run build
+
+      - name: Install Azion CLI
+        run: |
+          curl -sSL https://get.azion.dev/cli.sh | bash
 
       - name: Deploy to Azion
         run: |
           azioncli edge_applications deploy --token ${{ secrets.AZION_TOKEN }} --file-path dist/
-      
