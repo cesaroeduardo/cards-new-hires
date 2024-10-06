@@ -1,5 +1,6 @@
 <template>
   <div class="container mx-auto py-8">
+    <!-- Tela de entrada -->
     <div v-if="!userName" class="flex flex-col items-center gap-5">
       <h2 class="text-3xl font-bold text-black dark:text-white">
         Digite seu nome para entrar na sessão
@@ -18,6 +19,7 @@
       <div v-if="message" class="text-red-500 mt-4">{{ message }}</div>
     </div>
 
+    <!-- Tela da sessão -->
     <div v-else>
       <h3 class="text-2xl font-semibold mb-4 text-black dark:text-white">
         Bem-vindo, <span class="text-orange-600">{{ userName }}</span>
@@ -60,23 +62,34 @@ export default {
     return {
       cards: cardsData.map((card) => ({ ...card, flipped: false })),
       sessionCode: '',
-      userName: null,
-      userNameInput: '',
+      userName: null, // Nome do usuário atual
+      userNameInput: '', // Input de nome do usuário para entrar na sessão
       sessionId: '',
       connectedUsers: [],
       message: '',
     };
   },
   async created() {
+    // Recupera o nome do usuário do local storage, se existir
+    const savedUserName = localStorage.getItem('userName');
+    if (savedUserName) {
+      this.userName = savedUserName;
+    }
+
+    // Recupera o código da sessão da URL
     this.sessionCode = this.$route.params.sessionCode;
-    if (this.userNameInput && this.sessionCode) {
+
+    // Se o nome do usuário e o código da sessão estão disponíveis, entra na sessão automaticamente
+    if (this.userName && this.sessionCode) {
       await this.joinSession();
     }
   },
   methods: {
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
+        const cardState = flippedCards.find(
+          (c) => c.cardNumber === card.number
+        );
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -88,40 +101,40 @@ export default {
         return;
       }
       this.userName = this.userNameInput.trim();
+
+      // Salva o nome do usuário no local storage para futuras sessões
+      localStorage.setItem('userName', this.userName);
       this.message = '';
+
       await this.joinSession();
     },
     async joinSession() {
       try {
-        // Buscar a sessão no Supabase usando o sessionCode
+        // Passo 1: Buscar a sessão no Supabase usando o sessionCode
         const { data, error } = await supabase
           .from('sessions')
-          .select('id, flipped_cards, expires_at')
+          .select('id, flipped_cards')
           .eq('session_code', this.sessionCode.trim())
           .single();
 
         if (error || !data) {
-          console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
-          this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
-          return;
-        }
-
-        // Verificar se a sessão expirou
-        const now = new Date();
-        const expiresAt = new Date(data.expires_at);
-
-        if (expiresAt < now) {
-          console.warn('Sessão expirada.');
-          this.message = 'Esta sessão expirou. Por favor, crie uma nova sessão.';
+          console.error(
+            'Sessão não encontrada:',
+            error ? error.message : 'Código inválido'
+          );
+          this.message =
+            'Sessão não encontrada. Verifique o código e tente novamente.';
           return;
         }
 
         this.sessionId = data.id;
 
+        // Passo 2: Aplicar o estado das cartas armazenado no Supabase
         if (data.flipped_cards) {
           this.applyFlippedCards(data.flipped_cards);
         }
 
+        // Passo 3: Verificar se o usuário já está registrado na sessão
         const { data: existingUser } = await supabase
           .from('users')
           .select('id')
@@ -135,9 +148,9 @@ export default {
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
+        // Passo 4: Carregar usuários conectados e inscrever-se para mudanças
         await this.loadConnectedUsers();
         this.subscribeToCardUpdates();
-        this.subscribeToUserUpdates();
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
@@ -199,33 +212,6 @@ export default {
           (payload) => {
             if (payload.new && payload.new.flipped_cards) {
               this.applyFlippedCards(payload.new.flipped_cards);
-            }
-          }
-        )
-        .subscribe();
-    },
-    async subscribeToUserUpdates() {
-      supabase
-        .channel(`user-updates-${this.sessionId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'users',
-            filter: `session_id=eq.${this.sessionId}`,
-          },
-          (payload) => {
-            // Atualiza a lista de usuários conectados conforme as mudanças no banco de dados
-            if (payload.eventType === 'INSERT') {
-              this.connectedUsers.push(payload.new);
-            } else if (payload.eventType === 'DELETE') {
-              this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
-            } else if (payload.eventType === 'UPDATE') {
-              const userIndex = this.connectedUsers.findIndex((user) => user.id === payload.new.id);
-              if (userIndex !== -1) {
-                this.connectedUsers.splice(userIndex, 1, payload.new);
-              }
             }
           }
         )
