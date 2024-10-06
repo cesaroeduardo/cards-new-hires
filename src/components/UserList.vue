@@ -1,18 +1,33 @@
 <template>
   <div class="container mx-auto py-8">
     <div v-if="!userName" class="flex flex-col items-center">
-      <h2 class="text-3xl font-bold mb-4">Digite seu nome para entrar na sessão</h2>
-      <input v-model="userNameInput" placeholder="Seu nome" class="border p-2 rounded-lg mb-4" />
-      <button @click="saveUserName" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+      <h2 class="text-3xl font-bold mb-4">
+        Digite seu nome para entrar na sessão
+      </h2>
+      <input
+        v-model="userNameInput"
+        placeholder="Seu nome"
+        class="border p-2 rounded-lg mb-4"
+      />
+      <button
+        @click="saveUserName"
+        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+      >
         Entrar na Sessão
       </button>
       <div v-if="message" class="text-red-500 mt-4">{{ message }}</div>
     </div>
 
     <div v-else>
-      <h3 class="text-2xl font-semibold mb-4">Bem-vindo, <span class="text-blue-600">{{ userName }}</span></h3>
+      <h3 class="text-2xl font-semibold mb-4">
+        Bem-vindo, <span class="text-blue-600">{{ userName }}</span>
+      </h3>
 
-      <button v-if="isCreator" @click="endSession" class="mt-6 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition">
+      <button
+        v-if="isCreator"
+        @click="endSession"
+        class="mt-6 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+      >
         Encerrar Sessão
       </button>
 
@@ -46,7 +61,7 @@ export default {
   components: { Card, UserList },
   data() {
     return {
-      cards: cardsData.map(card => ({ ...card, flipped: false })),
+      cards: cardsData.map((card) => ({ ...card, flipped: false })),
       sessionCode: '',
       userName: null,
       userNameInput: '',
@@ -54,7 +69,7 @@ export default {
       sessionId: '',
       creatorId: '',
       connectedUsers: [],
-      message: ''
+      message: '',
     };
   },
   async created() {
@@ -89,8 +104,12 @@ export default {
             .single();
 
           if (error || !data) {
-            console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
-            this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
+            console.error(
+              'Sessão não encontrada:',
+              error ? error.message : 'Código inválido'
+            );
+            this.message =
+              'Sessão não encontrada. Verifique o código e tente novamente.';
             return;
           }
 
@@ -157,16 +176,28 @@ export default {
         .channel('realtime-users-updates')
         .on(
           'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
           (payload) => {
             this.connectedUsers.push(payload.new);
           }
         )
         .on(
           'postgres_changes',
-          { event: 'DELETE', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
           (payload) => {
-            this.connectedUsers = this.connectedUsers.filter(user => user.id !== payload.old.id);
+            this.connectedUsers = this.connectedUsers.filter(
+              (user) => user.id !== payload.old.id
+            );
           }
         )
         .subscribe();
@@ -174,13 +205,10 @@ export default {
       this.subscription = [userChannel];
     },
     async endSession() {
-      await supabase
-        .from('sessions')
-        .delete()
-        .eq('id', this.sessionId);
+      await supabase.from('sessions').delete().eq('id', this.sessionId);
 
       this.message = 'Sessão encerrada.';
-    }
-  }
+    },
+  },
 };
 </script>

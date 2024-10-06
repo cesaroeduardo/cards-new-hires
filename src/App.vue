@@ -5,12 +5,9 @@
 </template>
 
 <script>
-import HomeView from './components/HomeView.vue'
-import SessionView from './components/SessionView.vue'
-
 export default {
-  name: 'App'
-}
+  name: 'App',
+};
 </script>
 
 <style>

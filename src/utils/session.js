@@ -9,7 +9,9 @@ export async function createSession(sessionCode, userName) {
       .select();
 
     if (error || data.length === 0) {
-      throw new Error(`Erro ao criar sessão: ${error ? error.message : 'Dados inválidos'}`);
+      throw new Error(
+        `Erro ao criar sessão: ${error ? error.message : 'Dados inválidos'}`
+      );
     }
 
     return data[0]; // Retorna os dados da sessão criada
