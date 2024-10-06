@@ -13,15 +13,15 @@
     >
       <!-- Frente da Carta -->
       <div
-        class="absolute drop-shadow-xl w-full h-full bg-white dark:bg-white/5 border border-[#1e1e1e05] dark:border-white/10 rounded-lg backface-hidden text-black dark:text-white flex flex-col justify-center items-center card-front"
+        class="absolute drop-shadow-xl w-full h-full bg-white dark:bg-white/5 border border-[#1e1e1e10] dark:border-white/10 hover:border-[#1e1e1e30] hover:dark:border-white/20 hover:border-1.5 rounded-lg backface-hidden text-black dark:text-white flex flex-col justify-center items-center card-front"
       >
-        <span class="absolute top-4 right-4 text-sm opacity-30">{{
+        <span class="absolute top-4 right-4 text-sm opacity-30 font-mono">{{
           cardNumber
         }}</span>
-        <span class="absolute bottom-4 left-4 text-sm opacity-30">{{
+        <span class="absolute bottom-4 left-4 text-sm opacity-30 font-mono">{{
           cardNumber
         }}</span>
-        <div class="w-32 h-16 flex justify-center items-center">
+        <div class="w-10 flex justify-center items-center">
           <img
             src="../assets/logo.svg"
             alt="Logo Azion"
@@ -37,15 +37,15 @@
         <img
           :src="backImage"
           alt="Imagem do Conteúdo"
-          class="w-full max-h-32 object-cover"
+          class="w-full max-h-32 object-cover border-b border-[#1e1e1e05] dark:border-white/10"
         />
         <div
           class="flex flex-col justify-center h-full items-center px-3 text-balance gap-2"
         >
-          <span class="text-md font-medium mb-4 text-center">
+          <span class="text-md font-medium mb-4 text-center font-mono">
             {{ backTitle }}
           </span>
-          <p class="text-xs mb-4 text-center">
+          <p class="text-xs mb-4 text-center opacity-70 leading-relaxed">
             {{ backContent }}
           </p>
         </div>

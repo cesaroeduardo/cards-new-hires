@@ -1,8 +1,8 @@
 <template>
-  <div class="container mx-auto py-8">
+  <div class="max-w-7xl mx-auto py-8">
     <!-- Tela de entrada -->
     <div v-if="!userName" class="flex flex-col items-center gap-5">
-      <h2 class="text-3xl font-bold text-black dark:text-white">
+      <h2 class="text-2xl font-medium text-black dark:text-white font-mono">
         Digite seu nome para entrar na sessão
       </h2>
       <input
@@ -12,7 +12,7 @@
       />
       <button
         @click="saveUserName"
-        class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition"
+        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-orange-500 transition font-medium"
       >
         Entrar na Sessão
       </button>
@@ -20,21 +20,21 @@
     </div>
 
     <!-- Tela da sessão -->
-    <div v-else>
-      <h3 class="text-2xl font-semibold mb-4 text-black dark:text-white">
-        Bem-vindo, <span class="text-orange-600">{{ userName }}</span>
+    <div v-else class="flex justify-center items-center flex-col gap-8">
+      <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
+        Boas-vindas! <span class="text-orange-600">{{ userName }}</span>
       </h3>
 
       <!-- Lista de usuários conectados -->
-      <ul class="bg-gray-100 rounded-lg p-4 my-4">
-        <h2 class="text-md font-medium mb-2">Participantes:</h2>
-        <li v-for="user in connectedUsers" :key="user.id">
+      <ul class="flex w-auto px-10 flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md">
+        <h2 class="text-[10px] font-mono opacity-35 font-medium uppercase tracking-[.2rem]">Participantes</h2>
+        <li v-for="user in connectedUsers" :key="user.id" class="text-md font-mono opacity-70">
           {{ user.name }}
         </li>
       </ul>
 
       <!-- Container para exibir as cartas -->
-      <div class="flex justify-center flex-wrap gap-4 mt-10">
+      <div class="flex justify-center flex-wrap gap-4">
         <Card
           v-for="(card, index) in cards"
           :key="index"
