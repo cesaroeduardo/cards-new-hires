@@ -1,9 +1,7 @@
 <template>
   <div class="container mx-auto py-8">
     <div v-if="!userName" class="flex flex-col items-center">
-      <h2 class="text-3xl font-bold mb-4">
-        Digite seu nome para entrar na sessão
-      </h2>
+      <h2 class="text-3xl font-bold mb-4">Digite seu nome para entrar na sessão</h2>
       <input
         v-model="userNameInput"
         placeholder="Seu nome"
@@ -19,23 +17,20 @@
     </div>
 
     <div v-else>
-      <h3 class="text-2xl font-semibold mb-4">
-        Bem-vindo, <span class="text-blue-600">{{ userName }}</span>
-      </h3>
+      <h3 class="text-2xl font-semibold mb-4">Bem-vindo, <span class="text-blue-600">{{ userName }}</span></h3>
 
-      <button
-        v-if="isCreator"
+      <!-- <button
         @click="endSession"
         class="mt-6 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
       >
         Encerrar Sessão
-      </button>
+      </button> -->
 
       <!-- Lista de usuários conectados -->
       <ul class="bg-gray-100 rounded-lg p-4 my-4">
         <h2 class="text-xl font-semibold mb-2">Usuários Conectados:</h2>
         <li v-for="user in connectedUsers" :key="user.id">
-          {{ user.name }} <span v-if="user.name === creatorId">(Criador)</span>
+          {{ user.name }}
         </li>
       </ul>
 
@@ -65,33 +60,25 @@ export default {
   components: { Card },
   data() {
     return {
-      cards: cardsData.map((card) => ({ ...card, flipped: false })),
+      cards: cardsData.map(card => ({ ...card, flipped: false })),
       sessionCode: '',
       userName: null,
       userNameInput: '',
-      isCreator: false,
       sessionId: '',
-      creatorId: '',
       connectedUsers: [],
       message: '',
     };
   },
   async created() {
     this.sessionCode = this.$route.params.sessionCode;
-    this.userName = localStorage.getItem(`userName-${this.sessionCode}`);
-    this.sessionId = localStorage.getItem(`sessionId-${this.sessionCode}`);
-    console.log('sessionId após carregar do localStorage:', this.sessionId);
-
-    if (this.userName && this.sessionId) {
+    if (this.userName && this.sessionCode) {
       await this.joinSession();
     }
   },
   methods: {
     applyFlippedCards(flippedCards) {
-      this.cards.forEach((card) => {
-        const cardState = flippedCards.find(
-          (c) => c.cardNumber === card.number
-        );
+      this.cards.forEach(card => {
+        const cardState = flippedCards.find(c => c.cardNumber === card.number);
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -103,62 +90,32 @@ export default {
         return;
       }
       this.userName = this.userNameInput.trim();
-      localStorage.setItem(`userName-${this.sessionCode}`, this.userName);
       this.message = '';
       await this.joinSession();
     },
     async joinSession() {
       try {
-        // Passo 1: Tentar obter sessionId do localStorage
-        let sessionId = localStorage.getItem(`sessionId-${this.sessionCode}`);
-        if (!sessionId) {
-          // Passo 2: Se não existir, buscar no Supabase usando o sessionCode
-          const { data, error } = await supabase
-            .from('sessions')
-            .select('id, flipped_cards')
-            .eq('session_code', this.sessionCode.trim())
-            .single();
-
-          if (error || !data) {
-            console.error(
-              'Sessão não encontrada:',
-              error ? error.message : 'Código inválido'
-            );
-            this.message =
-              'Sessão não encontrada. Verifique o código e tente novamente.';
-            return;
-          }
-
-          // Passo 3: Armazenar sessionId no localStorage
-          sessionId = data.id;
-          localStorage.setItem(`sessionId-${this.sessionCode}`, sessionId);
-
-          // Passo 4: Aplicar o estado das cartas armazenado no Supabase
-          if (data.flipped_cards) {
-            this.applyFlippedCards(data.flipped_cards);
-          }
-        }
-
-        this.sessionId = sessionId;
-        console.log('Session ID carregado com sucesso:', this.sessionId);
-
-        // Passo 5: Recuperar e aplicar o estado das cartas da sessão
-        const { data: sessionData, error: sessionError } = await supabase
+        // Passo 1: Buscar a sessão no Supabase usando o sessionCode
+        const { data, error } = await supabase
           .from('sessions')
-          .select('flipped_cards')
-          .eq('id', this.sessionId)
+          .select('id, flipped_cards')
+          .eq('session_code', this.sessionCode.trim())
           .single();
 
-        if (sessionError) {
-          console.error(
-            'Erro ao carregar o estado das cartas:',
-            sessionError.message
-          );
-        } else if (sessionData.flipped_cards) {
-          this.applyFlippedCards(sessionData.flipped_cards);
+        if (error || !data) {
+          console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
+          this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
+          return;
         }
 
-        // Passo 6: Verificar se o usuário já está registrado
+        this.sessionId = data.id;
+
+        // Passo 2: Aplicar o estado das cartas armazenado no Supabase
+        if (data.flipped_cards) {
+          this.applyFlippedCards(data.flipped_cards);
+        }
+
+        // Passo 3: Verificar se o usuário já está registrado na sessão
         const { data: existingUser } = await supabase
           .from('users')
           .select('id')
@@ -172,15 +129,14 @@ export default {
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
-        // Passo 7: Carregar usuários conectados e inscrever-se para mudanças
+        // Passo 4: Carregar usuários conectados e inscrever-se para mudanças
         await this.loadConnectedUsers();
-        this.subscribeToChanges();
+        this.subscribeToCardUpdates();
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
       }
     },
-
     async loadConnectedUsers() {
       const { data, error } = await supabase
         .from('users')
@@ -198,7 +154,7 @@ export default {
 
       this.cards[index].flipped = !this.cards[index].flipped;
 
-      const updatedFlippedCards = this.cards.map((card) => ({
+      const updatedFlippedCards = this.cards.map(card => ({
         cardNumber: card.number,
         isFlipped: card.flipped,
       }));
@@ -240,8 +196,7 @@ export default {
             // Atualiza as cartas conforme os valores recebidos em tempo real
             this.cards.forEach((card, index) => {
               if (payload.new[`card_${index}_flipped`] !== undefined) {
-                this.cards[index].flipped =
-                  payload.new[`card_${index}_flipped`];
+                this.cards[index].flipped = payload.new[`card_${index}_flipped`];
               }
             });
           }
@@ -252,7 +207,6 @@ export default {
     },
     async endSession() {
       await supabase.from('sessions').delete().eq('id', this.sessionId);
-
       this.message = 'Sessão encerrada.';
     },
   },
