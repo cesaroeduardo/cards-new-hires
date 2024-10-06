@@ -72,6 +72,14 @@ export default {
     }
   },
   methods: {
+    applyFlippedCards(flippedCards) {
+      this.cards.forEach((card) => {
+        const cardState = flippedCards.find(c => c.cardNumber === card.number);
+        if (cardState) {
+          card.flipped = cardState.isFlipped;
+        }
+      });
+    },
     async saveUserName() {
       if (!this.userNameInput.trim()) {
         this.message = 'Por favor, insira um nome válido.';
@@ -91,42 +99,47 @@ export default {
         if (!sessionId) {
           const { data, error } = await supabase
             .from('sessions')
-            .select('id, creator_id')
+            .select('id, flipped_cards')
             .eq('session_code', this.sessionCode.trim())
             .single();
 
-          // Caso ocorra erro ou não encontre a sessão, exibe a mensagem e para a execução
           if (error || !data) {
             console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
             this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
             return;
           }
 
-          // Atribui o sessionId encontrado e salva no localStorage
           sessionId = data.id;
           localStorage.setItem(`sessionId-${this.sessionCode}`, sessionId);
+
+          // Se o estado das cartas está salvo no Supabase, carrega-o
+          if (data.flipped_cards) {
+            this.applyFlippedCards(data.flipped_cards);
+          }
         }
 
         // Atribui o sessionId ao estado da instância e verifica se está correto
         this.sessionId = sessionId;
         console.log("Session ID recuperado com sucesso:", this.sessionId);
 
-        // Caso o sessionId ainda esteja indefinido após todas as tentativas
         if (!this.sessionId) {
           console.error('Erro: sessionId não foi definido corretamente após recuperação!');
           this.message = 'Erro ao recuperar a sessão. Por favor, recarregue a página e tente novamente.';
           return;
         }
 
-        // Carrega o `creatorId` da sessão com base no sessionId
-        const { data: sessionData } = await supabase
+        // Carregar os estados das cartas do Supabase
+        const { data: sessionData, error: sessionError } = await supabase
           .from('sessions')
-          .select('creator_id')
+          .select('flipped_cards')
           .eq('id', this.sessionId)
           .single();
 
-        // Atribui o creatorId ao estado da instância
-        this.creatorId = sessionData.creator_id;
+        if (sessionError) {
+          console.error('Erro ao carregar o estado das cartas:', sessionError.message);
+        } else if (sessionData.flipped_cards) {
+          this.applyFlippedCards(sessionData.flipped_cards);
+        }
 
         // Verifica se o usuário já está registrado na sessão
         const { data: existingUser } = await supabase
@@ -136,16 +149,14 @@ export default {
           .eq('name', this.userName)
           .single();
 
-        // Caso o usuário não esteja registrado, realiza o registro no Supabase
         if (!existingUser) {
           await supabase
             .from('users')
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
-        // Carrega os usuários conectados e define isCreator para verificar se o usuário atual é o criador
+        // Carrega os usuários conectados
         await this.loadConnectedUsers();
-        this.isCreator = this.userName === this.creatorId;
 
         // Inscreve-se para mudanças em tempo real
         this.subscribeToChanges();
@@ -153,7 +164,9 @@ export default {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
       }
+      console.log("Session ID ao se inscrever nos canais:", this.sessionId);
     },
+
     async loadConnectedUsers() {
       const { data, error } = await supabase
         .from('users')
