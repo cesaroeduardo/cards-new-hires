@@ -4,7 +4,7 @@
     @click="toggleFlip"
     :class="!canFlip ? 'pointer-events-none' : ''"
   >
-    <div class="relative w-full h-full rounded-lg transform-style-preserve-3d transition-transform duration-500 ease-in-out" :class="isFlipped ? 'rotate-y-180' : ''">
+    <div class="relative w-full h-full rounded-lg transform-style-preserve-3d transition-transform duration-500 ease-in-out" :class="localIsFlipped ? 'rotate-y-180' : ''">
       <!-- Frente da Carta -->
       <div class="absolute w-full h-full bg-[#1e1e1e] rounded-lg backface-hidden flex flex-col justify-center items-center">
         <span class="absolute top-2 right-2 text-lg font-bold">{{ cardNumber }}</span>
@@ -47,9 +47,20 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      localIsFlipped: this.isFlipped, // Sincroniza o valor inicial
+    };
+  },
+  watch: {
+    isFlipped(newVal) {
+      this.localIsFlipped = newVal; // Atualiza o valor local quando a prop mudar
+    }
+  },
   methods: {
     toggleFlip() {
       if (this.canFlip) {
+        this.localIsFlipped = !this.localIsFlipped;
         this.$emit('flip-card'); // Emite um evento para notificar o componente pai
       }
     }
