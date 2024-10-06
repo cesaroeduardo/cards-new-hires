@@ -3,7 +3,7 @@ name: Deploy to Azion
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
