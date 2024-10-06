@@ -24,6 +24,7 @@ jobs:
       - name: Build Project
         run: npm run build
 
+      # A URL usada aqui precisa estar correta e ser acessível
       - name: Install Azion CLI
         run: |
           curl -sSL https://get.azion.dev/cli.sh | bash
