@@ -37,19 +37,22 @@ export default {
   },
   methods: {
     async createSession() {
-      this.message = ''; // Limpa a mensagem de feedback
-
+      this.message = '';
       const sessionId = uuidv4();
       const sessionCode = this.generateSessionCode();
 
+      // Definir a data de expiração como 6 horas após a criação
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 6);
+
       try {
-        // Insere a nova sessão na tabela `sessions` sem `creator_id`
         const { data: sessionData, error: sessionError } = await supabase
           .from('sessions')
           .insert([
             {
               id: sessionId,
               session_code: sessionCode,
+              expires_at: expiresAt.toISOString(), // Definindo o valor de expires_at
             },
           ])
           .select();
@@ -60,7 +63,7 @@ export default {
           return;
         }
 
-        // Redireciona o usuário diretamente para a sessão criada
+        this.message = 'Sessão criada com sucesso! Redirecionando...';
         this.$router.push(`/session/${sessionCode}`);
       } catch (error) {
         console.error('Erro inesperado ao criar a sessão:', error);

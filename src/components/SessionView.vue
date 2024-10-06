@@ -23,13 +23,6 @@
         Bem-vindo, <span class="text-orange-600">{{ userName }}</span>
       </h3>
 
-      <!-- <button
-        @click="endSession"
-        class="mt-6 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
-      >
-        Encerrar Sessão
-      </button> -->
-
       <!-- Lista de usuários conectados -->
       <ul class="bg-gray-100 rounded-lg p-4 my-4">
         <h2 class="text-xl font-semibold mb-2">Usuários Conectados:</h2>
@@ -76,16 +69,14 @@ export default {
   },
   async created() {
     this.sessionCode = this.$route.params.sessionCode;
-    if (this.userName && this.sessionCode) {
+    if (this.userNameInput && this.sessionCode) {
       await this.joinSession();
     }
   },
   methods: {
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find(
-          (c) => c.cardNumber === card.number
-        );
+        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -102,31 +93,35 @@ export default {
     },
     async joinSession() {
       try {
-        // Passo 1: Buscar a sessão no Supabase usando o sessionCode
+        // Buscar a sessão no Supabase usando o sessionCode
         const { data, error } = await supabase
           .from('sessions')
-          .select('id, flipped_cards')
+          .select('id, flipped_cards, expires_at')
           .eq('session_code', this.sessionCode.trim())
           .single();
 
         if (error || !data) {
-          console.error(
-            'Sessão não encontrada:',
-            error ? error.message : 'Código inválido'
-          );
-          this.message =
-            'Sessão não encontrada. Verifique o código e tente novamente.';
+          console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
+          this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
+          return;
+        }
+
+        // Verificar se a sessão expirou
+        const now = new Date();
+        const expiresAt = new Date(data.expires_at);
+
+        if (expiresAt < now) {
+          console.warn('Sessão expirada.');
+          this.message = 'Esta sessão expirou. Por favor, crie uma nova sessão.';
           return;
         }
 
         this.sessionId = data.id;
 
-        // Passo 2: Aplicar o estado das cartas armazenado no Supabase
         if (data.flipped_cards) {
           this.applyFlippedCards(data.flipped_cards);
         }
 
-        // Passo 3: Verificar se o usuário já está registrado na sessão
         const { data: existingUser } = await supabase
           .from('users')
           .select('id')
@@ -140,9 +135,9 @@ export default {
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
-        // Passo 4: Carregar usuários conectados e inscrever-se para mudanças
         await this.loadConnectedUsers();
         this.subscribeToCardUpdates();
+        this.subscribeToUserUpdates();
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
@@ -170,8 +165,6 @@ export default {
         isFlipped: card.flipped,
       }));
 
-      console.log('Session ID antes de atualizar a carta:', this.sessionId); // Verificação crítica
-
       if (!this.sessionId) {
         console.error('Erro: sessionId não está definido!');
         return;
@@ -193,29 +186,50 @@ export default {
       }
     },
     async subscribeToCardUpdates() {
-      const sessionChannel = supabase
-        .channel(`realtime-session-updates`)
+      supabase
+        .channel(`session-updates-${this.sessionId}`)
         .on(
           'postgres_changes',
           {
-            event: 'UPDATE',
+            event: '*',
             schema: 'public',
             table: 'sessions',
             filter: `id=eq.${this.sessionId}`,
           },
           (payload) => {
-            // Atualiza as cartas conforme os valores recebidos em tempo real
-            this.cards.forEach((card, index) => {
-              if (payload.new[`card_${index}_flipped`] !== undefined) {
-                this.cards[index].flipped =
-                  payload.new[`card_${index}_flipped`];
-              }
-            });
+            if (payload.new && payload.new.flipped_cards) {
+              this.applyFlippedCards(payload.new.flipped_cards);
+            }
           }
         )
         .subscribe();
-
-      this.subscription = [sessionChannel];
+    },
+    async subscribeToUserUpdates() {
+      supabase
+        .channel(`user-updates-${this.sessionId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
+          (payload) => {
+            // Atualiza a lista de usuários conectados conforme as mudanças no banco de dados
+            if (payload.eventType === 'INSERT') {
+              this.connectedUsers.push(payload.new);
+            } else if (payload.eventType === 'DELETE') {
+              this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
+            } else if (payload.eventType === 'UPDATE') {
+              const userIndex = this.connectedUsers.findIndex((user) => user.id === payload.new.id);
+              if (userIndex !== -1) {
+                this.connectedUsers.splice(userIndex, 1, payload.new);
+              }
+            }
+          }
+        )
+        .subscribe();
     },
     async endSession() {
       await supabase.from('sessions').delete().eq('id', this.sessionId);
