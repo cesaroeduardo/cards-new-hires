@@ -1,7 +1,8 @@
 <template>
-  <div class="container mx-auto py-8">
+  <div class="max-w-7xl mx-auto py-8">
+    <!-- Tela de entrada -->
     <div v-if="!userName" class="flex flex-col items-center gap-5">
-      <h2 class="text-3xl font-bold text-black dark:text-white">
+      <h2 class="text-2xl font-medium text-black dark:text-white font-mono">
         Digite seu nome para entrar na sessão
       </h2>
       <input
@@ -11,28 +12,41 @@
       />
       <button
         @click="saveUserName"
-        class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition"
+        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-orange-500 transition font-medium"
       >
         Entrar na Sessão
       </button>
       <div v-if="message" class="text-red-500 mt-4">{{ message }}</div>
     </div>
 
-    <div v-else>
-      <h3 class="text-2xl font-semibold mb-4 text-black dark:text-white">
-        Bem-vindo, <span class="text-orange-600">{{ userName }}</span>
+    <!-- Tela da sessão -->
+    <div v-else class="flex justify-center items-center flex-col gap-8">
+      <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
+        Boas-vindas! <span class="text-orange-600">{{ userName }}</span>
       </h3>
 
       <!-- Lista de usuários conectados -->
-      <ul class="bg-gray-100 rounded-lg p-4 my-4">
-        <h2 class="text-xl font-semibold mb-2">Usuários Conectados:</h2>
-        <li v-for="user in connectedUsers" :key="user.id">
+      <ul
+        v-if="connectedUsers.length > 0"
+        class="flex w-auto px-10 flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
+      >
+        <h2 class="text-[10px] font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
+          Participantes
+        </h2>
+        <li
+          v-for="user in connectedUsers"
+          :key="user.id"
+          class="text-md font-mono opacity-70"
+        >
           {{ user.name }}
         </li>
       </ul>
+      <p v-else class="text-md font-mono opacity-70">
+        Nenhum participante conectado ainda.
+      </p>
 
       <!-- Container para exibir as cartas -->
-      <div class="flex justify-center flex-wrap gap-4 mt-10">
+      <div class="flex justify-center flex-wrap gap-4">
         <Card
           v-for="(card, index) in cards"
           :key="index"
@@ -65,18 +79,25 @@ export default {
       sessionId: '',
       connectedUsers: [],
       message: '',
+      userMousePositions: [], // Posições dos mouses dos usuários
     };
   },
   async created() {
+    const savedUserName = localStorage.getItem('userName');
+    if (savedUserName) {
+      this.userName = savedUserName;
+    }
     this.sessionCode = this.$route.params.sessionCode;
-    if (this.userNameInput && this.sessionCode) {
+    if (this.userName && this.sessionCode) {
       await this.joinSession();
     }
   },
   methods: {
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
+        const cardState = flippedCards.find(
+          (c) => c.cardNumber === card.number
+        );
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -88,39 +109,25 @@ export default {
         return;
       }
       this.userName = this.userNameInput.trim();
+      localStorage.setItem('userName', this.userName);
       this.message = '';
       await this.joinSession();
     },
     async joinSession() {
       try {
-        // Buscar a sessão no Supabase usando o sessionCode
         const { data, error } = await supabase
           .from('sessions')
-          .select('id, flipped_cards, expires_at')
+          .select('id, flipped_cards')
           .eq('session_code', this.sessionCode.trim())
           .single();
 
         if (error || !data) {
-          console.error('Sessão não encontrada:', error ? error.message : 'Código inválido');
           this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
           return;
         }
 
-        // Verificar se a sessão expirou
-        const now = new Date();
-        const expiresAt = new Date(data.expires_at);
-
-        if (expiresAt < now) {
-          console.warn('Sessão expirada.');
-          this.message = 'Esta sessão expirou. Por favor, crie uma nova sessão.';
-          return;
-        }
-
         this.sessionId = data.id;
-
-        if (data.flipped_cards) {
-          this.applyFlippedCards(data.flipped_cards);
-        }
+        if (data.flipped_cards) this.applyFlippedCards(data.flipped_cards);
 
         const { data: existingUser } = await supabase
           .from('users')
@@ -136,8 +143,9 @@ export default {
         }
 
         await this.loadConnectedUsers();
-        this.subscribeToCardUpdates();
         this.subscribeToUserUpdates();
+        this.subscribeToCardUpdates();
+        this.subscribeToMousePositions(); // Adiciona assinatura para mudanças nos ponteiros
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
@@ -149,53 +157,50 @@ export default {
         .select('*')
         .eq('session_id', this.sessionId);
 
-      if (error) {
-        console.error('Erro ao carregar usuários conectados:', error.message);
-      } else {
+      if (!error) {
         this.connectedUsers = data;
+      } else {
+        console.error('Erro ao carregar usuários conectados:', error.message);
       }
     },
     async flipCard(index) {
-      if (this.cards[index].flipped === undefined) return;
-
       this.cards[index].flipped = !this.cards[index].flipped;
-
       const updatedFlippedCards = this.cards.map((card) => ({
         cardNumber: card.number,
         isFlipped: card.flipped,
       }));
-
-      if (!this.sessionId) {
-        console.error('Erro: sessionId não está definido!');
-        return;
-      }
-
       try {
-        const { error } = await supabase
+        await supabase
           .from('sessions')
           .update({ flipped_cards: updatedFlippedCards })
           .eq('id', this.sessionId);
-
-        if (error) {
-          console.error('Erro ao atualizar flipped_cards:', error.message);
-        } else {
-          console.log('flipped_cards atualizado com sucesso!');
-        }
       } catch (error) {
-        console.error('Erro ao atualizar flipped_cards no Supabase:', error);
+        console.error('Erro ao atualizar flipped_cards no Supabase:', error.message);
       }
+    },
+    subscribeToUserUpdates() {
+      const userChannel = supabase
+        .channel('realtime-users-updates')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          (payload) => {
+            if (payload.eventType === 'INSERT') {
+              this.connectedUsers.push(payload.new);
+            } else if (payload.eventType === 'DELETE') {
+              this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
+            }
+          }
+        )
+        .subscribe();
+      this.subscription = [userChannel];
     },
     async subscribeToCardUpdates() {
       supabase
         .channel(`session-updates-${this.sessionId}`)
         .on(
           'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'sessions',
-            filter: `id=eq.${this.sessionId}`,
-          },
+          { event: '*', schema: 'public', table: 'sessions', filter: `id=eq.${this.sessionId}` },
           (payload) => {
             if (payload.new && payload.new.flipped_cards) {
               this.applyFlippedCards(payload.new.flipped_cards);
@@ -204,29 +209,17 @@ export default {
         )
         .subscribe();
     },
-    async subscribeToUserUpdates() {
+    async subscribeToMousePositions() {
       supabase
-        .channel(`user-updates-${this.sessionId}`)
+        .channel(`mouse-positions-${this.sessionId}`)
         .on(
           'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'users',
-            filter: `session_id=eq.${this.sessionId}`,
-          },
+          { event: '*', schema: 'public', table: 'mouse_positions', filter: `session_id=eq.${this.sessionId}` },
           (payload) => {
-            // Atualiza a lista de usuários conectados conforme as mudanças no banco de dados
-            if (payload.eventType === 'INSERT') {
-              this.connectedUsers.push(payload.new);
-            } else if (payload.eventType === 'DELETE') {
-              this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
-            } else if (payload.eventType === 'UPDATE') {
-              const userIndex = this.connectedUsers.findIndex((user) => user.id === payload.new.id);
-              if (userIndex !== -1) {
-                this.connectedUsers.splice(userIndex, 1, payload.new);
-              }
-            }
+            const { user_id, x, y } = payload.new;
+            this.userMousePositions = this.userMousePositions.map((position) =>
+              position.user_id === user_id ? { user_id, x, y } : position
+            );
           }
         )
         .subscribe();
