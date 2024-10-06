@@ -27,23 +27,23 @@
 
       <!-- Lista de usuários conectados -->
       <ul
-        v-if="connectedUsers.length > 0"
-        class="flex w-auto px-10 flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
+        class="flex min-w-[360px] px-10 flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
       >
         <h2 class="text-[10px] font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
           Participantes
         </h2>
         <li
+          v-if="connectedUsers.length > 0"
           v-for="user in connectedUsers"
           :key="user.id"
           class="text-md font-mono opacity-70"
         >
           {{ user.name }}
         </li>
+        <p v-else class="text-xs py-1 dark:text-white text-black font-mono opacity-20">
+          Carregando participantes...
+        </p>
       </ul>
-      <p v-else class="text-md font-mono opacity-70">
-        Nenhum participante conectado ainda.
-      </p>
 
       <!-- Container para exibir as cartas -->
       <div class="flex justify-center flex-wrap gap-4">
