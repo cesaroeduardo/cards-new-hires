@@ -20,6 +20,10 @@
     "hash": "ece17106b72e2b68ff71aa7d99f2e8601eeedda0c2ba8ed52c50a89ff8da978b"
    },
    {
+    "name": ".edge/storage/assets/index.65532e51.js",
+    "hash": "f6b8accd3279d259220f0c883dc2a107841a0160eaa883d264105e0b0496c607"
+   },
+   {
     "name": ".edge/storage/assets/index.6e64e430.css",
     "hash": "01f9c0c036793be9f963d6d295e6c27f0af8f93e263e995bcd740611a9066963"
    },
@@ -38,6 +42,14 @@
    {
     "name": ".edge/storage/assets/index.d0b818f7.css",
     "hash": "48c64c6a22f4d0da7e34de36692bd050d7361e5d371fb52e7da3795843d7fd0d"
+   },
+   {
+    "name": ".edge/storage/assets/index.f1d320e0.js",
+    "hash": "24f5c197df9d61ff98a9a8a42927e43038272a6a701207efb47bc276fc193f90"
+   },
+   {
+    "name": ".edge/storage/assets/index.f7213e93.css",
+    "hash": "8e9a8929fabd0dfb0e5f89ca656b602338455475e115869aea239da2a6174d11"
    },
    {
     "name": ".edge/storage/assets/index.fcd0d265.js",
@@ -65,7 +77,7 @@
    },
    {
     "name": ".edge/storage/index.html",
-    "hash": "aba28516e4a878069958b667b6ef920cebe4de1912d097f519827adf4756d769"
+    "hash": "df8a9e5a3e4bf6fac596e9a292e91e7d45686103ef784c61bbfbd672869284c1"
    },
    {
     "name": ".edge/storage/js/828.e449746c.js",

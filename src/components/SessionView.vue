@@ -1,7 +1,7 @@
 <template>
-  <div class="max-w-7xl mx-auto py-8">
+  <div class="max-w-8xl mx-auto py-3 lg:px-8 px-4">
     <!-- Tela de entrada -->
-    <div v-if="!userName" class="flex flex-col items-center gap-5">
+    <div v-if="!userName" class="flex items-center gap-5">
       <h2 class="text-2xl font-medium text-black dark:text-white font-mono">
         Digite seu nome para entrar na sessão
       </h2>
@@ -20,46 +20,54 @@
     </div>
 
     <!-- Tela da sessão -->
-    <div v-else class="flex justify-center items-center flex-col gap-8">
-      <div class="flex items-center gap-4">
-        <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
-          Boas-vindas <span class="text-orange-600">{{ userName }}!</span>
-        </h3>
+    <div v-else class="flex justify-center items-start flex-col lg:flex-row gap-6">
+      <div class="flex flex-col gap-6 w-full lg:max-w-80">
+        <div class="flex flex-col items-start gap-3">
+          <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
+            Boas-vindas <span class="text-orange-600">{{ userName }}!</span>
+          </h3>
+          <p class="text-xs hidden lg:flex flex-col text-left text-pretty dark:text-white text-black font-mono opacity-70 leading-relaxed" >
+            Durante a dinâmica, cada um terá a oportunidade de se apresentar ao virar uma carta.O facilitador irá guiar as rodadas, e a cada turno, um novo participante será chamado para revelar sua carta.
+            <br><br>Todos poderão interagir, fazer perguntas e conhecer melhor os colegas. Vamos juntos criar um ambiente leve e acolhedor!
+            
+            <br><br><span class="text-yellow-300 font-bold text-md uppercase">Atenção: Espere o facilitador chamar a sua vez para clicar nas cartas.</span>
+          </p>
+        </div>
+
+        <!-- Lista de usuários conectados -->
+        <ul
+          class="flex min-w-[280px] w-full flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2"
+        >
+          <div class="flex flex-row items-center w-full px-2">
+            <h2 class="text-[10px] w-full text-left font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
+              Participantes
+            </h2>
+            <!-- Botão de Compartilhamento -->
+            <button
+              @click="shareLink"
+              class="text-black text-[10px] dark:text-white px-2 !w-auto py-2 opacity-40 rounded-lg dark:hover:bg-white/10 transition font-medium flex items-center gap-2"
+            >
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 14 14">
+              <path fill-rule="evenodd" d="M9.706 4.923a1.763 1.763 0 1 0-1.743-1.499l-2.817 2.04a1.763 1.763 0 1 0-.006 3.089l2.827 2.002a1.763 1.763 0 1 0 .756-1.178L6 7.447a1.766 1.766 0 0 0 .002-.876l2.705-1.958c.284.195.628.31 1 .31Z"/>
+            </svg>
+            </button>
+          </div>
+          <li
+            v-if="connectedUsers.length > 0"
+            v-for="user in connectedUsers"
+            :key="user.id"
+            class="text-sm font-mono opacity-70 text-left px-2"
+          >
+            {{ user.name }}
+          </li>
+          <p v-else class="text-xs py-1 dark:text-white text-black font-mono opacity-20">
+            Carregando participantes...
+          </p>
+        </ul>
       </div>
 
-      <!-- Lista de usuários conectados -->
-      <ul
-        class="flex min-w-[360px] flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
-      >
-        <div class="flex flex-row items-center w-full pl-6">
-          <h2 class="text-[10px] w-full font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
-            Participantes
-          </h2>
-          <!-- Botão de Compartilhamento -->
-          <button
-            @click="shareLink"
-            class="text-black text-[10px] dark:text-white px-2 !w-auto py-2 opacity-40 rounded-lg dark:hover:bg-white/10 transition font-medium flex items-center gap-2"
-          >
-          <svg width="14" height="14" fill="currentColor" viewBox="0 0 14 14">
-            <path fill-rule="evenodd" d="M9.706 4.923a1.763 1.763 0 1 0-1.743-1.499l-2.817 2.04a1.763 1.763 0 1 0-.006 3.089l2.827 2.002a1.763 1.763 0 1 0 .756-1.178L6 7.447a1.766 1.766 0 0 0 .002-.876l2.705-1.958c.284.195.628.31 1 .31Z"/>
-          </svg>
-          </button>
-        </div>
-        <li
-          v-if="connectedUsers.length > 0"
-          v-for="user in connectedUsers"
-          :key="user.id"
-          class="text-md font-mono opacity-70"
-        >
-          {{ user.name }}
-        </li>
-        <p v-else class="text-xs py-1 dark:text-white text-black font-mono opacity-20">
-          Carregando participantes...
-        </p>
-      </ul>
-
       <!-- Container para exibir as cartas -->
-      <div class="flex justify-center flex-wrap gap-4">
+      <div class="flex flex-wrap w-full items-start justify-center lg:justify-center">
         <Card
           v-for="(card, index) in cards"
           :key="index"

@@ -5,6 +5,9 @@
 </template>
 
 <script>
+// Importa o supabase para ser utilizado na função deleteExpiredSessions
+import { supabase } from './utils/supabase'; // Certifique-se de que o caminho esteja correto
+
 export default {
   name: 'App',
   async created() {
