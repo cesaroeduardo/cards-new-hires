@@ -1,36 +1,36 @@
 {
   "name": "cards-new-hires",
-  "bucket": "cards-new-hires",
+  "bucket": "cards-new-hires-20241006144117",
   "preset": "vue",
   "env": "production",
-  "prefix": "",
+  "prefix": "20241006144108",
   "not-first-run": true,
   "function": {
-    "id": 30150,
+    "id": 30151,
     "name": "__DEFAULT__",
     "file": ".edge/worker.js",
     "args": "azion/args.json",
-    "instance-id": 28895,
+    "instance-id": 28896,
     "instance-name": "__DEFAULT__",
     "cache-id": 0
   },
   "application": {
-    "id": 1728239280,
+    "id": 1728239281,
     "name": "__DEFAULT__"
   },
   "domain": {
-    "id": 1728237985,
+    "id": 1728237986,
     "name": "cards-new-hires",
-    "domain_name": "r0t33yddeu.map.azionedge.net",
-    "url": "https://r0t33yddeu.map.azionedge.net"
+    "domain_name": "d7rpj2snw7.map.azionedge.net",
+    "url": "https://d7rpj2snw7.map.azionedge.net"
   },
   "rt-purge": {
     "purge_on_publish": true
   },
   "origin": [
     {
-      "origin-id": 156272,
-      "origin-key": "81553e37-00a5-47f1-b157-ecbaea91f3ce",
+      "origin-id": 156274,
+      "origin-key": "8ba94b4b-9071-47c3-af5a-1c4e680779ab",
       "name": "origin-storage-default"
     }
   ],
@@ -38,17 +38,17 @@
     "created": false,
     "rules": [
       {
-        "id": 303581,
+        "id": 303586,
         "name": "Set Storage Origin for All Requests",
         "phase": "request"
       },
       {
-        "id": 303582,
+        "id": 303587,
         "name": "Deliver Static Assets",
         "phase": "request"
       },
       {
-        "id": 303583,
+        "id": 303588,
         "name": "Redirect to index.html",
         "phase": "request"
       }
