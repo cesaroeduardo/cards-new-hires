@@ -27,23 +27,23 @@
 
       <!-- Lista de usuários conectados -->
       <ul
-        v-if="connectedUsers.length > 0"
-        class="flex w-auto px-10 flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
+        class="flex min-w-[360px] px-10 flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2 max-w-screen-md"
       >
         <h2 class="text-[10px] font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
           Participantes
         </h2>
         <li
+          v-if="connectedUsers.length > 0"
           v-for="user in connectedUsers"
           :key="user.id"
           class="text-md font-mono opacity-70"
         >
           {{ user.name }}
         </li>
+        <p v-else class="text-xs py-1 dark:text-white text-black font-mono opacity-20">
+          Carregando participantes...
+        </p>
       </ul>
-      <p v-else class="text-md font-mono opacity-70">
-        Nenhum participante conectado ainda.
-      </p>
 
       <!-- Container para exibir as cartas -->
       <div class="flex justify-center flex-wrap gap-4">
@@ -58,6 +58,11 @@
           :isFlipped="card.flipped"
           @flip-card="flipCard(index)"
         />
+      </div>
+
+      <!-- Exibição dos ponteiros dos outros usuários -->
+      <div v-for="pointer in userMousePositions" :key="pointer.user_id" class="absolute" :style="{ top: pointer.y + 'px', left: pointer.x + 'px' }">
+        <span class="bg-orange-600 text-white rounded-full px-2 py-1 text-xs">{{ pointer.user_name }}</span>
       </div>
     </div>
   </div>
@@ -95,9 +100,7 @@ export default {
   methods: {
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find(
-          (c) => c.cardNumber === card.number
-        );
+        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -145,7 +148,7 @@ export default {
         await this.loadConnectedUsers();
         this.subscribeToUserUpdates();
         this.subscribeToCardUpdates();
-        this.subscribeToMousePositions(); // Adiciona assinatura para mudanças nos ponteiros
+        this.subscribeToMousePositions();
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
@@ -217,9 +220,12 @@ export default {
           { event: '*', schema: 'public', table: 'mouse_positions', filter: `session_id=eq.${this.sessionId}` },
           (payload) => {
             const { user_id, x, y } = payload.new;
-            this.userMousePositions = this.userMousePositions.map((position) =>
-              position.user_id === user_id ? { user_id, x, y } : position
-            );
+            const index = this.userMousePositions.findIndex((pos) => pos.user_id === user_id);
+            if (index !== -1) {
+              this.userMousePositions[index] = { ...payload.new };
+            } else {
+              this.userMousePositions.push({ ...payload.new });
+            }
           }
         )
         .subscribe();
