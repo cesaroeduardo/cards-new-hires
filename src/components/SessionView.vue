@@ -27,7 +27,7 @@
 
       <!-- Lista de usuários conectados -->
       <ul class="bg-gray-100 rounded-lg p-4 my-4">
-        <h2 class="text-xl font-semibold mb-2">Usuários Conectados:</h2>
+        <h2 class="text-md font-medium mb-2">Participantes:</h2>
         <li v-for="user in connectedUsers" :key="user.id">
           {{ user.name }}
         </li>

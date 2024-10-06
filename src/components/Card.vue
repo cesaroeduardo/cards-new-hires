@@ -1,8 +1,11 @@
 <template>
   <div
-    class="w-60 h-80 text-white rounded-lg shadow-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2 scale-105"
+    class="w-60 h-80 text-white rounded-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2 card3d"
     @click="toggleFlip"
+    @mousemove="handleMouseMove"
+    @mouseleave="resetCard"
     :class="!canFlip ? 'pointer-events-none' : ''"
+    ref="cardElement"
   >
     <div
       class="relative w-full h-full rounded-lg transform-style-preserve-3d transition-transform duration-500 ease-in-out"
@@ -10,12 +13,12 @@
     >
       <!-- Frente da Carta -->
       <div
-        class="absolute w-full h-full bg-[#1e1e1e] dark:bg-white/5 border border-[#1c1c1c] dark:border-white/10 rounded-lg backface-hidden flex flex-col justify-center items-center"
+        class="absolute drop-shadow-xl w-full h-full bg-white dark:bg-white/5 border border-[#1e1e1e05] dark:border-white/10 rounded-lg backface-hidden text-black dark:text-white flex flex-col justify-center items-center card-front"
       >
-        <span class="absolute top-2 right-2 text-lg font-medium opacity-50">{{
+        <span class="absolute top-4 right-4 text-sm opacity-30">{{
           cardNumber
         }}</span>
-        <span class="absolute bottom-2 left-2 text-lg font-medium opacity-50">{{
+        <span class="absolute bottom-4 left-4 text-sm opacity-30">{{
           cardNumber
         }}</span>
         <div class="w-32 h-16 flex justify-center items-center">
@@ -29,7 +32,7 @@
 
       <!-- Verso da Carta -->
       <div
-        class="absolute w-full h-full bg-white dark:bg-white/5 overflow-hidden border border-[#1c1c1c] dark:border-white/10 rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-start items-center gap-3"
+        class="absolute drop-shadow-xl w-full h-full bg-white dark:bg-white/5 border border-[#1e1e1e05] dark:border-white/10 overflow-hidden text-black dark:text-white rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-start items-center gap-3 card-back"
       >
         <img
           :src="backImage"
@@ -37,12 +40,12 @@
           class="w-full max-h-32 object-cover"
         />
         <div
-          class="flex flex-col justify-center h-full items-center px-3 text-balance gap-0"
+          class="flex flex-col justify-center h-full items-center px-3 text-balance gap-2"
         >
-          <span class="text-md font-medium text-white mb-4 text-center">
+          <span class="text-md font-medium mb-4 text-center">
             {{ backTitle }}
           </span>
-          <p class="text-sm text-white mb-4 text-center">
+          <p class="text-xs mb-4 text-center">
             {{ backContent }}
           </p>
         </div>
@@ -96,6 +99,31 @@ export default {
         this.$emit('flip-card'); // Emite um evento para notificar o componente pai
       }
     },
+    handleMouseMove(event) {
+      const card = this.$refs.cardElement;
+      const imgFront = card.querySelector('.card-front');
+      const imgRect = card.getBoundingClientRect();
+      const width = imgRect.width;
+      const height = imgRect.height;
+      const mouseX = event.offsetX;
+      const mouseY = event.offsetY;
+
+      // Calcular rotação com base na posição do mouse apenas para a frente da carta
+      const rotateY = this.map(mouseX, 0, width, -10, 10);
+      const rotateX = this.map(mouseY, 0, height, 10, -10);
+
+      imgFront.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    },
+    resetCard() {
+      const card = this.$refs.cardElement;
+      const imgFront = card.querySelector('.card-front');
+
+      // Resetar transformações apenas para a frente da carta
+      imgFront.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    },
+    map(val, minA, maxA, minB, maxB) {
+      return minB + ((val - minA) * (maxB - minB)) / (maxA - minA);
+    },
   },
 };
 </script>
@@ -117,7 +145,13 @@ export default {
   transform-style: preserve-3d;
 }
 
-.card {
-  transition: transform 0.6s;
+.card3d:hover {
+  z-index: 10;
+  transform: scale(1.05); /* Efeito de zoom */
+}
+
+.card-front,
+.card-back {
+  transition: transform 250ms ease-out, filter 250ms ease-out;
 }
 </style>

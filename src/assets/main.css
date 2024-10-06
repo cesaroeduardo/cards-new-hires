@@ -1,0 +1,12 @@
+body {
+  @apply bg-white dark:bg-[#1e1e1e] font-sans;
+}
+
+span,
+p,
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 !important;
+}
