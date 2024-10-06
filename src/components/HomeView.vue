@@ -1,16 +1,7 @@
 <template>
   <div class="container mx-auto py-8">
     <h1 class="text-4xl font-bold text-center mb-8">Cards New Hires</h1>
-    <p class="text-center mb-4">
-      Crie ou entre em uma sessão existente para conhecer os novos contratados!
-    </p>
-    <div class="flex justify-center">
-      <input
-        v-model="userName"
-        placeholder="Seu nome"
-        class="border p-2 rounded-lg mb-4"
-      />
-    </div>
+    <p class="text-center mb-4">Crie ou entre em uma sessão existente para conhecer os novos contratados!</p>
     <div class="flex justify-center">
       <button
         @click="createSession"
@@ -21,11 +12,7 @@
     </div>
 
     <!-- Feedback de erro ou sucesso -->
-    <div
-      v-if="message"
-      class="mt-4 text-center text-red-500"
-      v-html="message"
-    ></div>
+    <div v-if="message" class="mt-4 text-center text-red-500" v-html="message"></div>
   </div>
 </template>
 
@@ -36,7 +23,6 @@ import { supabase } from '../utils/supabase';
 export default {
   data() {
     return {
-      userName: '', // Nome do usuário inserido pelo usuário
       message: '', // Mensagem de feedback para o usuário
     };
   },
@@ -44,22 +30,16 @@ export default {
     async createSession() {
       this.message = ''; // Limpa a mensagem de feedback
 
-      if (!this.userName || this.userName.trim() === '') {
-        this.message = 'Digite um nome válido para criar a sessão.';
-        return;
-      }
-
       const sessionId = uuidv4();
       const sessionCode = this.generateSessionCode();
 
       try {
-        // Insere a nova sessão na tabela `sessions` sem `current_user`
+        // Insere a nova sessão na tabela `sessions` sem `creator_id`
         const { data: sessionData, error: sessionError } = await supabase
           .from('sessions')
           .insert([
             {
               id: sessionId,
-              creator_id: this.userName.trim(),
               session_code: sessionCode,
             },
           ])
@@ -71,25 +51,8 @@ export default {
           return;
         }
 
-        // Registra o criador da sessão na tabela `users`
-        const { error: userError } = await supabase
-          .from('users')
-          .insert([{ name: this.userName.trim(), session_id: sessionId }]);
-
-        if (userError) {
-          console.error(
-            'Erro ao registrar usuário na sessão:',
-            userError.message
-          );
-          this.message = `Erro ao registrar usuário: ${userError.message}`;
-        } else {
-          this.message =
-            'Sessão criada com sucesso e usuário registrado! Redirecionando...';
-          localStorage.setItem(`userName-${sessionCode}`, this.userName.trim());
-          setTimeout(() => {
-            this.$router.push(`/session/${sessionCode}`);
-          }, 1000);
-        }
+        // Redireciona o usuário diretamente para a sessão criada
+        this.$router.push(`/session/${sessionCode}`);
       } catch (error) {
         console.error('Erro inesperado ao criar a sessão:', error);
         this.message = `Erro inesperado ao criar a sessão: ${error.message}`;
