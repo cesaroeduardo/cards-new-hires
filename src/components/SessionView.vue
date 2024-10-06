@@ -74,30 +74,25 @@ export default {
     return {
       cards: cardsData.map((card) => ({ ...card, flipped: false })),
       sessionCode: '',
-      userName: null, // Nome do usuário atual
-      userNameInput: '', // Input de nome do usuário para entrar na sessão
+      userName: null,
+      userNameInput: '',
       sessionId: '',
-      connectedUsers: [], // Lista de usuários conectados na sessão
+      connectedUsers: [],
       message: '',
+      userMousePositions: [], // Posições dos mouses dos usuários
     };
   },
   async created() {
-    // Recupera o nome do usuário do local storage, se existir
     const savedUserName = localStorage.getItem('userName');
     if (savedUserName) {
       this.userName = savedUserName;
     }
-
-    // Recupera o código da sessão da URL
     this.sessionCode = this.$route.params.sessionCode;
-
-    // Se o nome do usuário e o código da sessão estão disponíveis, entra na sessão automaticamente
     if (this.userName && this.sessionCode) {
       await this.joinSession();
     }
   },
   methods: {
-    // Aplica o estado das cartas baseado no Supabase
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
         const cardState = flippedCards.find(
@@ -108,26 +103,18 @@ export default {
         }
       });
     },
-
-    // Salva o nome do usuário e entra na sessão
     async saveUserName() {
       if (!this.userNameInput.trim()) {
         this.message = 'Por favor, insira um nome válido.';
         return;
       }
       this.userName = this.userNameInput.trim();
-
-      // Salva o nome do usuário no local storage para futuras sessões
       localStorage.setItem('userName', this.userName);
       this.message = '';
-
       await this.joinSession();
     },
-
-    // Entra na sessão e carrega os dados
     async joinSession() {
       try {
-        // Passo 1: Buscar a sessão no Supabase usando o sessionCode
         const { data, error } = await supabase
           .from('sessions')
           .select('id, flipped_cards')
@@ -135,23 +122,13 @@ export default {
           .single();
 
         if (error || !data) {
-          console.error(
-            'Sessão não encontrada:',
-            error ? error.message : 'Código inválido'
-          );
-          this.message =
-            'Sessão não encontrada. Verifique o código e tente novamente.';
+          this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
           return;
         }
 
         this.sessionId = data.id;
+        if (data.flipped_cards) this.applyFlippedCards(data.flipped_cards);
 
-        // Passo 2: Aplicar o estado das cartas armazenado no Supabase
-        if (data.flipped_cards) {
-          this.applyFlippedCards(data.flipped_cards);
-        }
-
-        // Passo 3: Verificar se o usuário já está registrado na sessão
         const { data: existingUser } = await supabase
           .from('users')
           .select('id')
@@ -165,79 +142,65 @@ export default {
             .insert([{ name: this.userName, session_id: this.sessionId }]);
         }
 
-        // Passo 4: Carregar usuários conectados e inscrever-se para mudanças
         await this.loadConnectedUsers();
-        this.subscribeToUserUpdates(); // Chama a inscrição para atualizações em tempo real
-        this.subscribeToCardUpdates(); // Subscreve para mudanças no estado das cartas
+        this.subscribeToUserUpdates();
+        this.subscribeToCardUpdates();
+        this.subscribeToMousePositions(); // Adiciona assinatura para mudanças nos ponteiros
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
       }
     },
-
-    // Carrega os usuários conectados na sessão
     async loadConnectedUsers() {
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('session_id', this.sessionId);
 
-      if (error) {
-        console.error('Erro ao carregar usuários conectados:', error.message);
-      } else {
+      if (!error) {
         this.connectedUsers = data;
+      } else {
+        console.error('Erro ao carregar usuários conectados:', error.message);
       }
     },
-
-    // Inscreve-se para atualizações de usuários em tempo real
+    async flipCard(index) {
+      this.cards[index].flipped = !this.cards[index].flipped;
+      const updatedFlippedCards = this.cards.map((card) => ({
+        cardNumber: card.number,
+        isFlipped: card.flipped,
+      }));
+      try {
+        await supabase
+          .from('sessions')
+          .update({ flipped_cards: updatedFlippedCards })
+          .eq('id', this.sessionId);
+      } catch (error) {
+        console.error('Erro ao atualizar flipped_cards no Supabase:', error.message);
+      }
+    },
     subscribeToUserUpdates() {
       const userChannel = supabase
         .channel('realtime-users-updates')
         .on(
           'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'users',
-            filter: `session_id=eq.${this.sessionId}`,
-          },
+          { event: '*', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
           (payload) => {
-            console.log('Usuário inserido:', payload.new);
-            this.connectedUsers.push(payload.new);
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'DELETE',
-            schema: 'public',
-            table: 'users',
-            filter: `session_id=eq.${this.sessionId}`,
-          },
-          (payload) => {
-            console.log('Usuário removido:', payload.old);
-            this.connectedUsers = this.connectedUsers.filter(
-              (user) => user.id !== payload.old.id
-            );
+            if (payload.eventType === 'INSERT') {
+              this.connectedUsers.push(payload.new);
+            } else if (payload.eventType === 'DELETE') {
+              this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
+            }
           }
         )
         .subscribe();
-
       this.subscription = [userChannel];
     },
-
-    // Subscreve-se para atualizações das cartas em tempo real
     async subscribeToCardUpdates() {
       supabase
         .channel(`session-updates-${this.sessionId}`)
         .on(
           'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'sessions',
-            filter: `id=eq.${this.sessionId}`,
-          },
+          { event: '*', schema: 'public', table: 'sessions', filter: `id=eq.${this.sessionId}` },
           (payload) => {
             if (payload.new && payload.new.flipped_cards) {
               this.applyFlippedCards(payload.new.flipped_cards);
@@ -246,38 +209,21 @@ export default {
         )
         .subscribe();
     },
-
-    async flipCard(index) {
-      if (this.cards[index].flipped === undefined) return;
-
-      this.cards[index].flipped = !this.cards[index].flipped;
-
-      const updatedFlippedCards = this.cards.map((card) => ({
-        cardNumber: card.number,
-        isFlipped: card.flipped,
-      }));
-
-      if (!this.sessionId) {
-        console.error('Erro: sessionId não está definido!');
-        return;
-      }
-
-      try {
-        const { error } = await supabase
-          .from('sessions')
-          .update({ flipped_cards: updatedFlippedCards })
-          .eq('id', this.sessionId);
-
-        if (error) {
-          console.error('Erro ao atualizar flipped_cards:', error.message);
-        } else {
-          console.log('flipped_cards atualizado com sucesso!');
-        }
-      } catch (error) {
-        console.error('Erro ao atualizar flipped_cards no Supabase:', error);
-      }
+    async subscribeToMousePositions() {
+      supabase
+        .channel(`mouse-positions-${this.sessionId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'mouse_positions', filter: `session_id=eq.${this.sessionId}` },
+          (payload) => {
+            const { user_id, x, y } = payload.new;
+            this.userMousePositions = this.userMousePositions.map((position) =>
+              position.user_id === user_id ? { user_id, x, y } : position
+            );
+          }
+        )
+        .subscribe();
     },
-
     async endSession() {
       await supabase.from('sessions').delete().eq('id', this.sessionId);
       this.message = 'Sessão encerrada.';
