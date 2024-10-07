@@ -36,8 +36,16 @@
     "hash": "96fe75120bd3050851e4470b72e592bf950a5600752142e90b5fdf2550426aa2"
    },
    {
+    "name": ".edge/storage/assets/index.47d69117.js",
+    "hash": "570a8f43e56d340eefb98216f9f1d043c783811d582c90906fd3c03e4e454412"
+   },
+   {
     "name": ".edge/storage/assets/index.4aed4e3a.js",
     "hash": "693625ff0332a1bf2b612fe0cfd8a304f711870b15e8ac828da485cd01325bbc"
+   },
+   {
+    "name": ".edge/storage/assets/index.4e6d8052.css",
+    "hash": "cc44dac76aec8f39629ea24ca6558537c5f8310508b3c4203b1fcf34eed6f4d0"
    },
    {
     "name": ".edge/storage/assets/index.51f29390.js",
@@ -68,6 +76,10 @@
     "hash": "ebafce90f6fcfc027cc44c0767049a33d75883fdf9de2867368c946340a9512a"
    },
    {
+    "name": ".edge/storage/assets/index.92ffe438.js",
+    "hash": "d6019c55ca4f24a30dc6333dbacdb31bd757263000959ecb6eaad4a55bd4285b"
+   },
+   {
     "name": ".edge/storage/assets/index.ac34eacc.js",
     "hash": "0e13168669334447660da370bce64bc1bd7bbcc911ee0bd307c2567294a17c90"
    },
@@ -90,6 +102,10 @@
    {
     "name": ".edge/storage/assets/index.d0b818f7.css",
     "hash": "48c64c6a22f4d0da7e34de36692bd050d7361e5d371fb52e7da3795843d7fd0d"
+   },
+   {
+    "name": ".edge/storage/assets/index.da401820.css",
+    "hash": "b2a2b1f7253473325963d357052e4913b626a4f5bfbcd97228702cfbbc3e7671"
    },
    {
     "name": ".edge/storage/assets/index.ee70da23.css",
@@ -116,6 +132,26 @@
     "hash": "f268e9b2edc2b25b24399829187c71a60517ad3a5db91bf986c25ba580299851"
    },
    {
+    "name": ".edge/storage/assets/primeicons.36c54cec.svg",
+    "hash": "36c54cecfca947a6913c96df884300ce14108c4d8cb1cb241969321342f890c9"
+   },
+   {
+    "name": ".edge/storage/assets/primeicons.987f23ea.eot",
+    "hash": "987f23eadfa70c603276a71c3c975c8d0534d9c719d8a6e3d965005e7b93747b"
+   },
+   {
+    "name": ".edge/storage/assets/primeicons.9eea6e0b.woff2",
+    "hash": "9eea6e0bcb974ec568fdcb1eec182d3b5383a3a23899a690140b2c0167886882"
+   },
+   {
+    "name": ".edge/storage/assets/primeicons.dc895fee.ttf",
+    "hash": "dc895fee9f3ce1b0eaf16b4b9fab20077fc2981e6c0b332e4c97c176832fc05b"
+   },
+   {
+    "name": ".edge/storage/assets/primeicons.f5d1d219.woff",
+    "hash": "f5d1d2195e05b8085953aa7d50b2e77070cd1120e0100a8600771aa5ba11a01e"
+   },
+   {
     "name": ".edge/storage/css/app.d2eed122.css",
     "hash": "55961e7b2e309c2c35b9680bd3271b6f7249c008f099861771e0338d5221a257"
    },
@@ -129,7 +165,7 @@
    },
    {
     "name": ".edge/storage/index.html",
-    "hash": "1f989250d430536d08f0cc5a60839341e425da0f87048f0b30c51bfab6331ddc"
+    "hash": "861152711c453f2fb80bb3aab9194c8a6c567ee98b2668082ded12ae747e9a0e"
    },
    {
     "name": ".edge/storage/js/828.e449746c.js",
