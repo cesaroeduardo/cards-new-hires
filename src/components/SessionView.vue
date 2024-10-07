@@ -234,12 +234,16 @@ export default {
       const x = event.clientX;
       const y = event.clientY;
 
+      // Verifique se userName e sessionId estão corretamente definidos
+      if (!this.userName || !this.sessionId) {
+        console.error('Nome de usuário ou ID de sessão ausente');
+        return;
+      }
+
       try {
         const { error } = await supabase
           .from('mouse_positions')
-          .upsert({ user_name: this.userName, session_id: this.sessionId, x, y })
-          .eq('user_name', this.userName)
-          .eq('session_id', this.sessionId);
+          .upsert({ user_name: this.userName, session_id: this.sessionId, x, y });
 
         if (error) {
           console.error('Erro ao atualizar posição do mouse:', error.message);
