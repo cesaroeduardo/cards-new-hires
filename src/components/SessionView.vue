@@ -80,9 +80,9 @@
             <p
               class="text-xs flex-col text-left text-pretty dark:text-white text-black font-mono opacity-70 leading-relaxed"
             >
-              Durante a dinâmica, cada um terá a oportunidade de se apresentar ao
-              virar uma carta. O facilitador irá guiar as rodadas, e a cada turno,
-              um novo participante será chamado para revelar sua carta.
+              Durante a dinâmica, cada um terá a oportunidade de se apresentar
+              ao virar uma carta. O facilitador irá guiar as rodadas, e a cada
+              turno, um novo participante será chamado para revelar sua carta.
             </p>
           </div>
 
@@ -199,7 +199,9 @@ export default {
     },
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
+        const cardState = flippedCards.find(
+          (c) => c.cardNumber === card.number
+        );
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -292,14 +294,12 @@ export default {
         }
 
         // Insira a nova posição do mouse
-        const { error } = await supabase
-          .from('mouse_positions')
-          .upsert({
-            user_name: this.userName,
-            session_id: this.sessionId,
-            x,
-            y,
-          });
+        const { error } = await supabase.from('mouse_positions').upsert({
+          user_name: this.userName,
+          session_id: this.sessionId,
+          x,
+          y,
+        });
 
         if (error) {
           console.error('Erro ao atualizar posição do mouse:', error.message);
@@ -403,7 +403,9 @@ export default {
     },
     async flipCard(cardNumber, isFlipped) {
       // Localizar o índice da carta correspondente pelo número
-      const cardIndex = this.cards.findIndex((card) => card.number === cardNumber);
+      const cardIndex = this.cards.findIndex(
+        (card) => card.number === cardNumber
+      );
 
       if (cardIndex !== -1) {
         // Atualizar o estado local da carta
@@ -422,10 +424,13 @@ export default {
             .update({ flipped_cards: updatedFlippedCards })
             .eq('id', this.sessionId);
         } catch (error) {
-          console.error('Erro ao atualizar flipped_cards no Supabase:', error.message);
+          console.error(
+            'Erro ao atualizar flipped_cards no Supabase:',
+            error.message
+          );
         }
       }
-    }
+    },
   },
 };
 </script>
