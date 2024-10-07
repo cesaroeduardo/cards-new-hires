@@ -5,6 +5,9 @@
 </template>
 
 <script>
+// Importa o supabase para ser utilizado na função deleteExpiredSessions
+import { supabase } from './utils/supabase'; // Certifique-se de que o caminho esteja correto
+
 export default {
   name: 'App',
   async created() {
@@ -21,7 +24,10 @@ export default {
           console.log('Sessões expiradas deletadas com sucesso.');
         }
       } catch (err) {
-        console.error('Erro ao chamar a função delete_expired_sessions:', err.message);
+        console.error(
+          'Erro ao chamar a função delete_expired_sessions:',
+          err.message
+        );
       }
     },
   },
