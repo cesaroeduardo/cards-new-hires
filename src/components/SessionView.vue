@@ -83,10 +83,6 @@
               Durante a dinâmica, cada um terá a oportunidade de se apresentar ao
               virar uma carta. O facilitador irá guiar as rodadas, e a cada turno,
               um novo participante será chamado para revelar sua carta.
-              <br /><br /><span class="text-orange-500 font-bold text-md"
-                >Atenção: Espere o facilitador chamar a sua vez para clicar nas
-                cartas.</span
-              >
             </p>
           </div>
 

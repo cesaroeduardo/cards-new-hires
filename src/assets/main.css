@@ -1,7 +1,7 @@
 @import 'primeicons/primeicons.css';
 
 body {
-  @apply bg-[#aaaaaa10] dark:bg-[#1e1e1e] font-sans;
+  @apply bg-white dark:bg-[#1e1e1e] font-sans;
 }
 
 span,
