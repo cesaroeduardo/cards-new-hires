@@ -1,18 +1,18 @@
 <template>
   <div class="max-w-7xl mx-auto py-2 lg:px-8 px-4">
     <!-- Tela de entrada -->
-    <div v-if="!userName" class="flex items-center gap-5">
-      <h2 class="text-2xl font-medium text-black dark:text-white font-mono">
+    <div v-if="!userName" class="flex flex-col items-center gap-5 w-full">
+      <h2 class="text-xl font-medium text-black dark:text-white font-mono">
         Digite seu nome para entrar na sessão
       </h2>
       <input
         v-model="userNameInput"
         placeholder="Seu nome"
-        class="border p-2 rounded-lg"
+        class="border text-sm p-2 rounded-md min-w-60"
       />
       <button
         @click="saveUserName"
-        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-xs hover:bg-orange-500 transition font-medium"
+        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-md hover:bg-orange-500 transition font-medium"
       >
         Entrar na Sessão
       </button>
@@ -21,8 +21,9 @@
 
     <!-- Tela da sessão -->
     <div
+      @mousemove="updateMousePosition"
       v-else
-      class="flex justify-center items-start flex-col lg:flex-col gap-10"
+      class="flex justify-center items-start flex-col lg:flex-col gap-10 relative"
     >
       <div class="flex flex-col md:flex-row gap-12 w-full lg:w-full">
         <!-- Lista de usuários conectados -->
@@ -69,7 +70,7 @@
           </p>
         </ul>
 
-        <!-- Boas vindas e instruçoes -->
+        <!-- Boas vindas e instruções -->
         <div class="flex flex-col items-start gap-3 max-w-[440px]">
           <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
             Boas-vindas à equipe
@@ -98,7 +99,6 @@
       <div
         class="flex flex-wrap w-full items-start justify-between gap-1 lg:justify-start gap-y-1"
       >
-      <hr>
         <Card
           v-for="(card, index) in cards"
           :key="index"
@@ -110,6 +110,18 @@
           :isFlipped="card.flipped"
           @flip-card="flipCard(index)"
         />
+      </div>
+
+      <!-- Exibição dos ponteiros dos outros usuários -->
+      <div
+        v-for="pointer in userPointers"
+        :key="pointer.user_name"
+        class="absolute"
+        :style="{ top: pointer.y - 55 + 'px', left: pointer.x - 95 + 'px' }"
+      >
+        <span class="bg-orange-600 text-white rounded-full px-2 py-1 text-xs">
+          {{ pointer.user_name }}
+        </span>
       </div>
     </div>
   </div>
@@ -130,8 +142,8 @@ export default {
       userNameInput: '',
       sessionId: '',
       connectedUsers: [],
+      userPointers: [], // Lista para armazenar a posição do mouse dos usuários
       message: '',
-      userMousePositions: [], // Posições dos mouses dos usuários
     };
   },
   async created() {
@@ -142,14 +154,16 @@ export default {
     this.sessionCode = this.$route.params.sessionCode;
     if (this.userName && this.sessionCode) {
       await this.joinSession();
+      this.subscribeToMousePositionUpdates(); // Inscrever-se para atualizações de posição do mouse
+      this.subscribeToCardUpdates(); // Inscreve-se para atualizações de cartas
+      this.subscribeToUserUpdates(); // Inscreve-se para atualizações de usuários
     }
   },
   methods: {
     applyFlippedCards(flippedCards) {
+      // Método para aplicar o estado das cartas
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find(
-          (c) => c.cardNumber === card.number
-        );
+        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -164,6 +178,9 @@ export default {
       localStorage.setItem('userName', this.userName);
       this.message = '';
       await this.joinSession();
+      this.subscribeToMousePositionUpdates();
+      this.subscribeToCardUpdates();
+      this.subscribeToUserUpdates();
     },
     async joinSession() {
       try {
@@ -196,9 +213,6 @@ export default {
         }
 
         await this.loadConnectedUsers();
-        this.subscribeToUserUpdates();
-        this.subscribeToCardUpdates();
-        this.subscribeToMousePositions(); // Adiciona assinatura para mudanças nos ponteiros
       } catch (error) {
         console.error('Erro ao entrar na sessão:', error.message);
         this.message = `Erro ao entrar na sessão: ${error.message}`;
@@ -216,55 +230,50 @@ export default {
         console.error('Erro ao carregar usuários conectados:', error.message);
       }
     },
-    async flipCard(index) {
-      this.cards[index].flipped = !this.cards[index].flipped;
-      const updatedFlippedCards = this.cards.map((card) => ({
-        cardNumber: card.number,
-        isFlipped: card.flipped,
-      }));
+    async updateMousePosition(event) {
+      const x = event.clientX;
+      const y = event.clientY;
+
       try {
-        await supabase
-          .from('sessions')
-          .update({ flipped_cards: updatedFlippedCards })
-          .eq('id', this.sessionId);
-      } catch (error) {
-        console.error(
-          'Erro ao atualizar flipped_cards no Supabase:',
-          error.message
-        );
+        const { error } = await supabase
+          .from('mouse_positions')
+          .upsert({ user_name: this.userName, session_id: this.sessionId, x, y })
+          .eq('user_name', this.userName)
+          .eq('session_id', this.sessionId);
+
+        if (error) {
+          console.error('Erro ao atualizar posição do mouse:', error.message);
+        }
+      } catch (err) {
+        console.error('Erro ao chamar a função updateMousePosition:', err.message);
       }
     },
-    subscribeToUserUpdates() {
-      const userChannel = supabase
-        .channel('realtime-users-updates')
+    subscribeToMousePositionUpdates() {
+      const mousePositionChannel = supabase
+        .channel(`mouse-positions-${this.sessionId}`)
         .on(
           'postgres_changes',
           {
             event: '*',
             schema: 'public',
-            table: 'users',
+            table: 'mouse_positions',
             filter: `session_id=eq.${this.sessionId}`,
           },
           (payload) => {
-            if (payload.eventType === 'INSERT') {
-              this.connectedUsers.push(payload.new);
-            } else if (payload.eventType === 'DELETE') {
-              this.connectedUsers = this.connectedUsers.filter(
-                (user) => user.id !== payload.old.id
-              );
-            }
+            this.updateUserPointer(payload.new);
           }
         )
         .subscribe();
-      this.subscription = [userChannel];
+
+      this.subscription = [mousePositionChannel];
     },
-    async subscribeToCardUpdates() {
+    subscribeToCardUpdates() {
       supabase
         .channel(`session-updates-${this.sessionId}`)
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'UPDATE',
             schema: 'public',
             table: 'sessions',
             filter: `id=eq.${this.sessionId}`,
@@ -277,25 +286,48 @@ export default {
         )
         .subscribe();
     },
-    async subscribeToMousePositions() {
-      supabase
-        .channel(`mouse-positions-${this.sessionId}`)
+    subscribeToUserUpdates() {
+      const userChannel = supabase
+        .channel('realtime-users-updates')
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'INSERT',
             schema: 'public',
-            table: 'mouse_positions',
+            table: 'users',
             filter: `session_id=eq.${this.sessionId}`,
           },
           (payload) => {
-            const { user_id, x, y } = payload.new;
-            this.userMousePositions = this.userMousePositions.map((position) =>
-              position.user_id === user_id ? { user_id, x, y } : position
+            this.connectedUsers.push(payload.new);
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
+          (payload) => {
+            this.connectedUsers = this.connectedUsers.filter(
+              (user) => user.id !== payload.old.id
             );
           }
         )
         .subscribe();
+
+      this.subscription = [userChannel];
+    },
+    updateUserPointer(pointer) {
+      const index = this.userPointers.findIndex(
+        (p) => p.user_name === pointer.user_name
+      );
+      if (index !== -1) {
+        this.userPointers[index] = pointer;
+      } else {
+        this.userPointers.push(pointer);
+      }
     },
     async shareLink() {
       const link = window.location.href;
@@ -306,10 +338,28 @@ export default {
         console.error('Erro ao copiar o link:', err);
       }
     },
-    async endSession() {
-      await supabase.from('sessions').delete().eq('id', this.sessionId);
-      this.message = 'Sessão encerrada.';
+    async flipCard(index) {
+      this.cards[index].flipped = !this.cards[index].flipped;
+      const updatedFlippedCards = this.cards.map((card) => ({
+        cardNumber: card.number,
+        isFlipped: card.flipped,
+      }));
+      try {
+        await supabase
+          .from('sessions')
+          .update({ flipped_cards: updatedFlippedCards })
+          .eq('id', this.sessionId);
+      } catch (error) {
+        console.error('Erro ao atualizar flipped_cards no Supabase:', error.message);
+      }
     },
   },
 };
 </script>
+
+<style scoped>
+.pointer-indicator {
+  z-index: 10;
+  pointer-events: none;
+}
+</style>
