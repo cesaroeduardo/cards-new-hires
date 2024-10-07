@@ -11,5 +11,6 @@ module.exports = {
       'mono': ['Roboto Mono', 'monospace'],
     }
   },
+  darkMode: 'class', // Adicione esta linha para usar a classe `dark`
   plugins: [],
 }

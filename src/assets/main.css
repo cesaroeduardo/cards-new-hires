@@ -1,5 +1,7 @@
+@import 'primeicons/primeicons.css';
+
 body {
-  @apply bg-white dark:bg-[#1e1e1e] font-sans;
+  @apply bg-[#aaaaaa10] dark:bg-[#1e1e1e] font-sans;
 }
 
 span,
@@ -9,4 +11,8 @@ h2,
 h3,
 h4 {
   margin: 0 !important;
+}
+
+.button-icon-outline {
+  @apply text-black text-[10px] bg-white dark:bg-[#000]/10 dark:text-white px-2 h-8 w-8 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition font-medium flex items-center gap-2 border border-[#1e1e1e20] dark:border-white/20
 }
