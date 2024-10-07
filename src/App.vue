@@ -24,7 +24,10 @@ export default {
           console.log('Sessões expiradas deletadas com sucesso.');
         }
       } catch (err) {
-        console.error('Erro ao chamar a função delete_expired_sessions:', err.message);
+        console.error(
+          'Erro ao chamar a função delete_expired_sessions:',
+          err.message
+        );
       }
     },
   },

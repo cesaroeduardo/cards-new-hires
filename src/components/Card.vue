@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-[180px] h-[285px] md:w-[230px] md:h-[285px] text-white rounded-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2 card3d"
+    class="w-[185px] h-[285px] md:w-[224px] md:h-[300px] text-white rounded-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2 card3d"
     @click="toggleFlip"
     @mousemove="handleMouseMove"
     @mouseleave="resetCard"

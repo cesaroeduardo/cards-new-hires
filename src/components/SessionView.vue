@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-8xl mx-auto py-3 lg:px-8 px-4">
+  <div class="max-w-7xl mx-auto py-2 lg:px-8 px-4">
     <!-- Tela de entrada -->
     <div v-if="!userName" class="flex items-center gap-5">
       <h2 class="text-2xl font-medium text-black dark:text-white font-mono">
@@ -12,7 +12,7 @@
       />
       <button
         @click="saveUserName"
-        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-orange-500 transition font-medium"
+        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-xs hover:bg-orange-500 transition font-medium"
       >
         Entrar na Sessão
       </button>
@@ -20,26 +20,19 @@
     </div>
 
     <!-- Tela da sessão -->
-    <div v-else class="flex justify-center items-start flex-col lg:flex-row gap-6">
-      <div class="flex flex-col gap-6 w-full lg:max-w-80">
-        <div class="flex flex-col items-start gap-3">
-          <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
-            Boas-vindas <span class="text-orange-600">{{ userName }}!</span>
-          </h3>
-          <p class="text-xs hidden lg:flex flex-col text-left text-pretty dark:text-white text-black font-mono opacity-70 leading-relaxed" >
-            Durante a dinâmica, cada um terá a oportunidade de se apresentar ao virar uma carta.O facilitador irá guiar as rodadas, e a cada turno, um novo participante será chamado para revelar sua carta.
-            <br><br>Todos poderão interagir, fazer perguntas e conhecer melhor os colegas. Vamos juntos criar um ambiente leve e acolhedor!
-            
-            <br><br><span class="text-yellow-300 font-bold text-md uppercase">Atenção: Espere o facilitador chamar a sua vez para clicar nas cartas.</span>
-          </p>
-        </div>
-
+    <div
+      v-else
+      class="flex justify-center items-start flex-col lg:flex-col gap-10"
+    >
+      <div class="flex flex-col md:flex-row gap-12 w-full lg:w-full">
         <!-- Lista de usuários conectados -->
         <ul
-          class="flex min-w-[280px] w-full flex-col justify-center rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2"
+          class="flex min-w-[280px] w-full md:max-w-[320px] flex-col h-auto justify-start rounded-lg p-4 text-black dark:text-white bg-[#1e1e1e05] dark:bg-white/5 border border-[#1e1e1e15] dark:border-white/10 gap-2"
         >
           <div class="flex flex-row items-center w-full px-2">
-            <h2 class="text-[10px] w-full text-left font-mono opacity-35 font-medium uppercase tracking-[.2rem]">
+            <h2
+              class="text-[10px] w-full text-left font-mono opacity-35 font-medium uppercase tracking-[.2rem]"
+            >
               Participantes
             </h2>
             <!-- Botão de Compartilhamento -->
@@ -47,9 +40,17 @@
               @click="shareLink"
               class="text-black text-[10px] dark:text-white px-2 !w-auto py-2 opacity-40 rounded-lg dark:hover:bg-white/10 transition font-medium flex items-center gap-2"
             >
-            <svg width="14" height="14" fill="currentColor" viewBox="0 0 14 14">
-              <path fill-rule="evenodd" d="M9.706 4.923a1.763 1.763 0 1 0-1.743-1.499l-2.817 2.04a1.763 1.763 0 1 0-.006 3.089l2.827 2.002a1.763 1.763 0 1 0 .756-1.178L6 7.447a1.766 1.766 0 0 0 .002-.876l2.705-1.958c.284.195.628.31 1 .31Z"/>
-            </svg>
+              <svg
+                width="14"
+                height="14"
+                fill="currentColor"
+                viewBox="0 0 14 14"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M9.706 4.923a1.763 1.763 0 1 0-1.743-1.499l-2.817 2.04a1.763 1.763 0 1 0-.006 3.089l2.827 2.002a1.763 1.763 0 1 0 .756-1.178L6 7.447a1.766 1.766 0 0 0 .002-.876l2.705-1.958c.284.195.628.31 1 .31Z"
+                />
+              </svg>
             </button>
           </div>
           <li
@@ -60,14 +61,43 @@
           >
             {{ user.name }}
           </li>
-          <p v-else class="text-xs py-1 dark:text-white text-black font-mono opacity-20">
+          <p
+            v-else
+            class="text-xs text-left px-2 py-1 dark:text-white text-black font-mono opacity-20"
+          >
             Carregando participantes...
           </p>
         </ul>
+
+        <!-- Boas vindas e instruçoes -->
+        <div class="flex flex-col items-start gap-3 max-w-[440px]">
+          <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
+            Boas-vindas à equipe
+            <span class="text-orange-600">{{ userName }}!</span>
+          </h3>
+          <p
+            class="text-[10px] w-full text-left font-mono opacity-35 text-black dark:text-white font-medium uppercase tracking-[.2rem]"
+          >
+            Instruções
+          </p>
+          <p
+            class="text-xs flex-col text-left text-pretty dark:text-white text-black font-mono opacity-70 leading-relaxed"
+          >
+            Durante a dinâmica, cada um terá a oportunidade de se apresentar ao
+            virar uma carta. O facilitador irá guiar as rodadas, e a cada turno,
+            um novo participante será chamado para revelar sua carta.
+            <br /><br /><span class="text-orange-500 font-bold text-md"
+              >Atenção: Espere o facilitador chamar a sua vez para clicar nas
+              cartas.</span
+            >
+          </p>
+        </div>
       </div>
 
       <!-- Container para exibir as cartas -->
-      <div class="flex flex-wrap w-full items-start justify-center lg:justify-center">
+      <div
+        class="flex flex-wrap w-full items-start justify-between gap-1 lg:justify-start gap-y-1"
+      >
         <Card
           v-for="(card, index) in cards"
           :key="index"
@@ -143,7 +173,8 @@ export default {
           .single();
 
         if (error || !data) {
-          this.message = 'Sessão não encontrada. Verifique o código e tente novamente.';
+          this.message =
+            'Sessão não encontrada. Verifique o código e tente novamente.';
           return;
         }
 
@@ -196,7 +227,10 @@ export default {
           .update({ flipped_cards: updatedFlippedCards })
           .eq('id', this.sessionId);
       } catch (error) {
-        console.error('Erro ao atualizar flipped_cards no Supabase:', error.message);
+        console.error(
+          'Erro ao atualizar flipped_cards no Supabase:',
+          error.message
+        );
       }
     },
     subscribeToUserUpdates() {
@@ -204,12 +238,19 @@ export default {
         .channel('realtime-users-updates')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          {
+            event: '*',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
           (payload) => {
             if (payload.eventType === 'INSERT') {
               this.connectedUsers.push(payload.new);
             } else if (payload.eventType === 'DELETE') {
-              this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
+              this.connectedUsers = this.connectedUsers.filter(
+                (user) => user.id !== payload.old.id
+              );
             }
           }
         )
@@ -221,7 +262,12 @@ export default {
         .channel(`session-updates-${this.sessionId}`)
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'sessions', filter: `id=eq.${this.sessionId}` },
+          {
+            event: '*',
+            schema: 'public',
+            table: 'sessions',
+            filter: `id=eq.${this.sessionId}`,
+          },
           (payload) => {
             if (payload.new && payload.new.flipped_cards) {
               this.applyFlippedCards(payload.new.flipped_cards);
@@ -235,7 +281,12 @@ export default {
         .channel(`mouse-positions-${this.sessionId}`)
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'mouse_positions', filter: `session_id=eq.${this.sessionId}` },
+          {
+            event: '*',
+            schema: 'public',
+            table: 'mouse_positions',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
           (payload) => {
             const { user_id, x, y } = payload.new;
             this.userMousePositions = this.userMousePositions.map((position) =>

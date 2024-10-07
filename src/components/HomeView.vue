@@ -2,7 +2,9 @@
   <div
     class="container mx-auto py-8 gap-4 text-black dark:text-white flex flex-col justify-center max-w-[480px]"
   >
-    <h1 class="text-2xl font-medium text-black dark:text-white font-mono">Cards New Hires</h1>
+    <h1 class="text-2xl font-medium text-black dark:text-white font-mono">
+      Cards New Hires
+    </h1>
     <p class="text-center mb-4 opacity-60 text-sm leading-relaxed text-balance">
       Crie uma sessão para iniciar a dinâmica, após, compartilhe o link da
       sessão com os convidados!
