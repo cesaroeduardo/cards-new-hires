@@ -1,18 +1,18 @@
 <template>
   <div class="max-w-7xl mx-auto py-2 lg:px-8 px-4">
     <!-- Tela de entrada -->
-    <div v-if="!userName" class="flex items-center gap-5">
-      <h2 class="text-2xl font-medium text-black dark:text-white font-mono">
+    <div v-if="!userName" class="flex flex-col items-center gap-5 w-full">
+      <h2 class="text-xl font-medium text-black dark:text-white font-mono">
         Digite seu nome para entrar na sessão
       </h2>
       <input
         v-model="userNameInput"
         placeholder="Seu nome"
-        class="border p-2 rounded-lg"
+        class="border text-sm p-2 rounded-md min-w-60"
       />
       <button
         @click="saveUserName"
-        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-xs hover:bg-orange-500 transition font-medium"
+        class="bg-orange-600 text-white px-4 py-2 text-sm rounded-md hover:bg-orange-500 transition font-medium"
       >
         Entrar na Sessão
       </button>
