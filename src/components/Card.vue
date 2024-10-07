@@ -31,7 +31,7 @@
 
       <!-- Verso da Carta -->
       <div
-        class="absolute w-full h-full bg-white/80 dark:bg-[#222] border border-[#1e1e1e10] dark:border-white/10 overflow-hidden text-black dark:text-white rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-start items-center gap-3 card-back"
+        class="absolute w-full h-full bg-white/80 dark:bg-[#222] border border-[#1e1e1e10] dark:border-white/10 overflow-hidden hover:border-[#1e1e1e30] hover:dark:border-white/20 text-black dark:text-white rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-start items-center gap-3 card-back"
       >
         <img
           :src="backImage"
