@@ -3,7 +3,7 @@
   "bucket": "cards-new-hires-2",
   "preset": "vue",
   "env": "production",
-  "prefix": "20241006220032",
+  "prefix": "20241006223931",
   "not-first-run": true,
   "function": {
     "id": 30152,

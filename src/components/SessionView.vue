@@ -65,15 +65,15 @@ export default {
       userNameInput: '',
       sessionId: '',
       connectedUsers: [],
-      userPointers: [],
+      userPointers: [], // Lista para armazenar a posição do mouse dos usuários
       message: '',
     };
   },
   computed: {
     validUserPointers() {
-      // Filtrar apenas os ponteiros válidos para exibição
+      // Filtrar apenas os ponteiros válidos e não mostrar o ponteiro do próprio usuário
       return this.userPointers.filter(
-        (pointer) => pointer.x && pointer.y && !isNaN(pointer.x) && !isNaN(pointer.y)
+        (pointer) => pointer.x && pointer.y && !isNaN(pointer.x) && !isNaN(pointer.y) && pointer.user_name !== this.userName
       );
     },
   },
@@ -149,13 +149,28 @@ export default {
       const x = event.clientX;
       const y = event.clientY;
 
+      // Verifique se userName e sessionId estão corretamente definidos
       if (!this.userName || !this.sessionId) {
         console.error('Nome de usuário ou ID de sessão ausente');
         return;
       }
 
       try {
-        const { error } = await supabase.from('mouse_positions').upsert({ user_name: this.userName, session_id: this.sessionId, x, y });
+        // Primeiro, apague todas as posições anteriores do usuário
+        const { error: deleteError } = await supabase
+          .from('mouse_positions')
+          .delete()
+          .eq('user_name', this.userName)
+          .eq('session_id', this.sessionId);
+
+        if (deleteError) {
+          console.error('Erro ao deletar posições antigas do mouse:', deleteError.message);
+        }
+
+        // Insira a nova posição do mouse
+        const { error } = await supabase
+          .from('mouse_positions')
+          .upsert({ user_name: this.userName, session_id: this.sessionId, x, y });
 
         if (error) {
           console.error('Erro ao atualizar posição do mouse:', error.message);
@@ -169,7 +184,12 @@ export default {
         .channel(`mouse-positions-${this.sessionId}`)
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'mouse_positions', filter: `session_id=eq.${this.sessionId}` },
+          {
+            event: '*',
+            schema: 'public',
+            table: 'mouse_positions',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
           (payload) => {
             this.updateUserPointer(payload.new);
           }
@@ -183,7 +203,12 @@ export default {
         .channel(`session-updates-${this.sessionId}`)
         .on(
           'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'sessions', filter: `id=eq.${this.sessionId}` },
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'sessions',
+            filter: `id=eq.${this.sessionId}`,
+          },
           (payload) => {
             if (payload.new && payload.new.flipped_cards) {
               this.applyFlippedCards(payload.new.flipped_cards);
@@ -197,14 +222,24 @@ export default {
         .channel('realtime-users-updates')
         .on(
           'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
           (payload) => {
             this.connectedUsers.push(payload.new);
           }
         )
         .on(
           'postgres_changes',
-          { event: 'DELETE', schema: 'public', table: 'users', filter: `session_id=eq.${this.sessionId}` },
+          {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'users',
+            filter: `session_id=eq.${this.sessionId}`,
+          },
           (payload) => {
             this.connectedUsers = this.connectedUsers.filter((user) => user.id !== payload.old.id);
           }
@@ -232,7 +267,10 @@ export default {
     },
     async flipCard(index) {
       this.cards[index].flipped = !this.cards[index].flipped;
-      const updatedFlippedCards = this.cards.map((card) => ({ cardNumber: card.number, isFlipped: card.flipped }));
+      const updatedFlippedCards = this.cards.map((card) => ({
+        cardNumber: card.number,
+        isFlipped: card.flipped,
+      }));
       try {
         await supabase.from('sessions').update({ flipped_cards: updatedFlippedCards }).eq('id', this.sessionId);
       } catch (error) {
