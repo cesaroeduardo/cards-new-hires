@@ -1,6 +1,6 @@
 <template>
   <div
-    class="card-container w-[185px] h-[285px] md:w-[224px] md:h-[300px] text-white rounded-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2"
+    class="card-container w-[185px] h-[300px] md:w-[224px] md:h-[300px] text-white rounded-lg transform transition-transform duration-500 ease-in-out cursor-pointer perspective mx-2 my-2"
     @click="toggleFlip"
     @mousemove="handleMouseMove"
     @mouseleave="resetCard"
@@ -36,7 +36,7 @@
         <img
           :src="backImage"
           alt="Imagem do Conteúdo"
-          class="w-full max-h-28 object-cover border-b border-[#1e1e1e05] dark:border-white/10"
+          class="w-full max-h-44 object-cover border-b border-[#1e1e1e05] dark:border-white/10"
         />
         <div
           class="flex flex-col justify-center h-full items-center px-3 text-balance gap-2"
