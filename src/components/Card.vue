@@ -95,7 +95,7 @@ export default {
     toggleFlip() {
       if (this.canFlip) {
         this.localIsFlipped = !this.localIsFlipped;
-        this.$emit('flip-card'); // Emite um evento para notificar o componente pai
+        this.$emit('flip-card', this.cardNumber, this.localIsFlipped);
       }
     },
     handleMouseMove(event) {
@@ -149,9 +149,18 @@ export default {
   transform: scale(1.05); /* Efeito de zoom */
 }
 
+.card-front {
+  z-index: 2;
+}
+
+.card-back {
+  z-index: 1;
+}
+
 .card-front,
 .card-back {
   box-shadow: 0px 10px 20px #00000010;
   transition: transform 250ms ease-out, filter 250ms ease-out;
+  pointer-events: auto; /* Permitir clique em ambas as faces */
 }
 </style>

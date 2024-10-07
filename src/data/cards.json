@@ -69,6 +69,6 @@
     "number": 12,
     "backTitle": "Carta Coringa",
     "backContent": "Que tal um Icebreaker? Compartilhe uma curiosidade sobre você.",
-    "backImage": "https://www.azion.com/assets/pages/about/azion-01.jpg"
+    "backImage": "./cards/rafael.png"
   }
 ]

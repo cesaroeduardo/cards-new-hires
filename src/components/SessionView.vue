@@ -113,9 +113,9 @@
           :backTitle="card.backTitle"
           :backContent="card.backContent"
           :backImage="card.backImage"
-          :canFlip="!card.flipped"
+          :canFlip="true"
           :isFlipped="card.flipped"
-          @flip-card="flipCard(index)"
+          @flip-card="flipCard"
         />
       </div>
 
@@ -203,9 +203,7 @@ export default {
     },
     applyFlippedCards(flippedCards) {
       this.cards.forEach((card) => {
-        const cardState = flippedCards.find(
-          (c) => c.cardNumber === card.number
-        );
+        const cardState = flippedCards.find((c) => c.cardNumber === card.number);
         if (cardState) {
           card.flipped = cardState.isFlipped;
         }
@@ -407,24 +405,31 @@ export default {
         console.error('Erro ao copiar o link:', err);
       }
     },
-    async flipCard(index) {
-      this.cards[index].flipped = !this.cards[index].flipped;
-      const updatedFlippedCards = this.cards.map((card) => ({
-        cardNumber: card.number,
-        isFlipped: card.flipped,
-      }));
-      try {
-        await supabase
-          .from('sessions')
-          .update({ flipped_cards: updatedFlippedCards })
-          .eq('id', this.sessionId);
-      } catch (error) {
-        console.error(
-          'Erro ao atualizar flipped_cards no Supabase:',
-          error.message
-        );
+    async flipCard(cardNumber, isFlipped) {
+      // Localizar o índice da carta correspondente pelo número
+      const cardIndex = this.cards.findIndex((card) => card.number === cardNumber);
+
+      if (cardIndex !== -1) {
+        // Atualizar o estado local da carta
+        this.cards[cardIndex].flipped = isFlipped;
+
+        // Atualizar o estado das cartas no Supabase
+        const updatedFlippedCards = this.cards.map((card) => ({
+          cardNumber: card.number,
+          isFlipped: card.flipped,
+        }));
+
+        try {
+          // Atualizar no Supabase com await para garantir a execução completa
+          await supabase
+            .from('sessions')
+            .update({ flipped_cards: updatedFlippedCards })
+            .eq('id', this.sessionId);
+        } catch (error) {
+          console.error('Erro ao atualizar flipped_cards no Supabase:', error.message);
+        }
       }
-    },
+    }
   },
 };
 </script>
