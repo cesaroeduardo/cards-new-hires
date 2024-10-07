@@ -152,7 +152,7 @@ export default {
       connectedUsers: [],
       userPointers: [], // Lista para armazenar a posição do mouse dos usuários
       message: '',
-      isDarkMode: false,
+      isDarkMode: true,
     };
   },
   computed: {
