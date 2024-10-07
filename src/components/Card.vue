@@ -109,8 +109,8 @@ export default {
       const mouseY = event.offsetY;
 
       // Calcular rotação com base na posição do mouse apenas para a frente da carta
-      const rotateY = this.map(mouseX, 0, width, -10, 10);
-      const rotateX = this.map(mouseY, 0, height, 10, -10);
+      const rotateY = this.map(mouseX, 0, width, -15, 15);
+      const rotateX = this.map(mouseY, 0, height, 15, -15);
 
       imgFront.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
     },

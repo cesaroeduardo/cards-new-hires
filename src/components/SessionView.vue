@@ -98,6 +98,7 @@
       <div
         class="flex flex-wrap w-full items-start justify-between gap-1 lg:justify-start gap-y-1"
       >
+      <hr>
         <Card
           v-for="(card, index) in cards"
           :key="index"
