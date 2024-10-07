@@ -71,15 +71,15 @@
         </ul>
 
         <!-- Boas vindas e instruções -->
-        <div class="flex flex-col items-start gap-3 max-w-[440px]">
-          <h3 class="text-2xl font-medium text-black dark:text-white font-mono">
-            Boas-vindas à equipe
+        <div class="flex flex-col items-start gap-4 max-w-[440px]">
+          <h3 class="text-xl font-medium text-black dark:text-white font-mono">
+            Boas-vindas à Azion
             <span class="text-orange-600">{{ userName }}!</span>
           </h3>
           <p
             class="text-[10px] w-full text-left font-mono opacity-35 text-black dark:text-white font-medium uppercase tracking-[.2rem]"
           >
-            Instruções
+            Sobre a dinâmica
           </p>
           <p
             class="text-xs flex-col text-left text-pretty dark:text-white text-black font-mono opacity-70 leading-relaxed"
