@@ -12,7 +12,7 @@
     >
       <!-- Frente da Carta -->
       <div
-        class="absolute w-full h-full bg-white/80 dark:bg-[#222] border border-[#1e1e1e10] dark:border-white/10 hover:border-[#1e1e1e30] hover:dark:border-white/20 rounded-lg backface-hidden text-black dark:text-white flex flex-col justify-center items-center card-front"
+        class="absolute w-full h-full bg-white/80 dark:bg-[#222] border border-[#1e1e1e15] dark:border-white/10 hover:border-[#1e1e1e35] hover:dark:border-white/20 rounded-lg backface-hidden text-black dark:text-white flex flex-col justify-center items-center card-front"
       >
         <span class="absolute top-4 right-4 text-sm opacity-30 font-mono">{{
           cardNumber
@@ -31,17 +31,17 @@
 
       <!-- Verso da Carta -->
       <div
-        class="absolute w-full h-full bg-white/80 dark:bg-[#222] border border-[#1e1e1e10] dark:border-white/10 overflow-hidden hover:border-[#1e1e1e30] hover:dark:border-white/20 text-black dark:text-white rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-start items-center gap-3 card-back"
+        class="absolute w-full h-full bg-white/80 dark:bg-[#222] border border-[#1e1e1e15] dark:border-white/10 overflow-hidden hover:border-[#1e1e1e35] hover:dark:border-white/20 text-black dark:text-white rounded-lg transform rotate-y-180 backface-hidden flex flex-col justify-start items-center card-back"
       >
         <img
           :src="backImage"
           alt="Imagem do Conteúdo"
-          class="w-full max-h-44 object-cover border-b border-[#1e1e1e05] dark:border-white/10"
+          class="w-full max-h-44 object-cover border-b border-[#1e1e1e15] dark:border-white/10"
         />
         <div
           class="flex flex-col justify-center h-full items-center px-3 text-balance gap-2"
         >
-          <span class="text-sm font-medium mb-2 text-center font-mono">{{
+          <span class="text-sm font-medium text-center font-mono">{{
             backTitle
           }}</span>
           <p class="text-xs mb-4 text-center opacity-70 leading-normal">

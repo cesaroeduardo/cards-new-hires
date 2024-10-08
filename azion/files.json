@@ -28,6 +28,10 @@
     "hash": "2cc481b4f037119a167e173bd722eb0ba4563fd2b5aaf14b009116f06e8be294"
    },
    {
+    "name": ".edge/storage/assets/index.1c6b0d02.js",
+    "hash": "c265927ae8123a2ae354d7fb8e5e68c3802bea30262af633ed448bb7949aee36"
+   },
+   {
     "name": ".edge/storage/assets/index.1fe221f2.css",
     "hash": "4f385459c878a906bb406fd43f2177f72c2f19425098b1ad1942e590d0b185bd"
    },
@@ -82,6 +86,10 @@
    {
     "name": ".edge/storage/assets/index.92ffe438.js",
     "hash": "d6019c55ca4f24a30dc6333dbacdb31bd757263000959ecb6eaad4a55bd4285b"
+   },
+   {
+    "name": ".edge/storage/assets/index.9ef8ffac.css",
+    "hash": "ada38659eb8a985fa717d2dcfebee2502983c558d797232c653922ca8c974268"
    },
    {
     "name": ".edge/storage/assets/index.a8e6a6c2.css",
@@ -169,51 +177,55 @@
    },
    {
     "name": ".edge/storage/cards/azion.png",
-    "hash": "35ae557e73516fd9db4e2d6e3dad6926c4528ed845762be91f6fb7656b1960bf"
+    "hash": "95881b24e7af67f0b9ebf84c1bf32e309ca0dd0dc97ca3d3d2d2f24532d6adef"
    },
    {
     "name": ".edge/storage/cards/benefits.png",
-    "hash": "7e871fb74faa6936cc5d31d0552aa8392587d6fb245c0b4f42bdf06580be43c9"
+    "hash": "36d023dbf7d5c24d8e21638d3ea84901d8382bc066842cf545e06c6a35d83bb2"
    },
    {
     "name": ".edge/storage/cards/buddy.png",
-    "hash": "5900f899d12fe9ec90af0fab76048d80024f3a04dd8d24225a2b45b03436153f"
+    "hash": "50f6d3b0d1f6313e093424318663eb67a972b3ebfa5dc6486fde064c8b04be66"
    },
    {
     "name": ".edge/storage/cards/coringa.png",
-    "hash": "1d4274623d2d4138008c4fbff2b65df29046e144319a25335d302bfb469c6432"
+    "hash": "9c318fd89da52e52ea11bc0420a9232b230f8eb74f282de38faa1b103d9777d4"
    },
    {
     "name": ".edge/storage/cards/evalues.png",
-    "hash": "01e8cdb87001cef37e1d8d5043599c29532b51f205b9ec908c2ab617c080ec83"
+    "hash": "f1c1b9c6f0986deb5c7bb5c7277007a93bc1163c9d8c332e0606567150effd07"
    },
    {
     "name": ".edge/storage/cards/experience.png",
-    "hash": "51dcf7824a19ed19959bb4ffae47d63b2c30d55ecf5cbb9561f056b48e8f6af3"
+    "hash": "326acb6419e6b8d56888b238a4caba1d878d4e14bdbae3d1234b4e2434568d6b"
    },
    {
     "name": ".edge/storage/cards/organogram.png",
-    "hash": "dc001309945f08d31eb98e179064b15f5e76e259b9cb6945ffe4d7155871aa0f"
+    "hash": "2c967583ee79dcb37bbdcc0b63e75083151ac77aa7c844d4d4dcc0e0cef5f03d"
    },
    {
     "name": ".edge/storage/cards/people.png",
-    "hash": "1f2bad1ead334d92871366c7f1323d92074603f38d4bc89c15ba272db3114684"
+    "hash": "991d531b4eb7f181336020add25bb03f270188e5b4053ce501805cc6aaddc30f"
    },
    {
     "name": ".edge/storage/cards/plataforms.png",
-    "hash": "c59a82ed581d38f5ebb9a1a62217b2e4976ca487ac17c14e97bcef3a988d2278"
+    "hash": "b24ec1d19dd32cb3c864ec36624bea7cf437655da89ca075febbeebca8e1704c"
    },
    {
     "name": ".edge/storage/cards/rafael.png",
-    "hash": "35826a76336020a51b22b8d01988ebc94220f91c3531cae7fe2942ae507874f0"
+    "hash": "5502054b7b1d07e4f302da1334f48124e58daa1505077d860355a6e475418ba3"
    },
    {
     "name": ".edge/storage/cards/sofa.jpg",
     "hash": "fd00ea9fd3dac91763c6167a794b18594f29a8f47d9533398460fa399f9fab7b"
    },
    {
+    "name": ".edge/storage/cards/sofa.png",
+    "hash": "3232e3b23d51aa4d95e4b3629d2ce7e5cb35f79aaa5bf1c41a9073ff56ac5259"
+   },
+   {
     "name": ".edge/storage/cards/values.png",
-    "hash": "a6b3db63dddb52df5af1b7301072e77723a85acd2b87794df5e20e69edd736d3"
+    "hash": "5d845409468604d325a1a86a9ee06f6570139dad86373d7ecbc03674dbae4fef"
    },
    {
     "name": ".edge/storage/css/app.d2eed122.css",
@@ -229,7 +241,7 @@
    },
    {
     "name": ".edge/storage/index.html",
-    "hash": "4d8c8629dc7da36fb04bd6a6e3a337a1cb4cec8b74d92f7698d3e06463bae21d"
+    "hash": "247ca1414634dc7f51fc503402893c09c035ccda4129a9682b97bf58f45351de"
    },
    {
     "name": ".edge/storage/js/828.e449746c.js",
