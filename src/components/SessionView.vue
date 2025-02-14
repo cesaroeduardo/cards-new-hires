@@ -132,15 +132,17 @@
 </template>
 
 <script>
+// Importa o componente Card e os utilitários do Supabase e do Sanity
 import Card from './Card.vue';
 import { supabase } from '../utils/supabase';
-import cardsData from '../data/cards.json';
+import sanityClient from '../utils/sanity';
 
 export default {
   components: { Card },
   data() {
     return {
-      cards: cardsData.map((card) => ({ ...card, flipped: false })),
+      // Agora os cards serão carregados do Sanity
+      cards: [],
       sessionCode: '',
       userName: null,
       userNameInput: '',
@@ -222,6 +224,7 @@ export default {
     },
     async joinSession() {
       try {
+        // Primeiro, busca os dados da sessão
         const { data, error } = await supabase
           .from('sessions')
           .select('id, flipped_cards')
@@ -235,8 +238,16 @@ export default {
         }
 
         this.sessionId = data.id;
-        if (data.flipped_cards) this.applyFlippedCards(data.flipped_cards);
 
+        // Em seguida, busca as cartas do Sanity
+        await this.fetchCards();
+
+        // Depois de carregar as cartas, aplica o estado de flip se houver
+        if (data.flipped_cards) {
+          this.applyFlippedCards(data.flipped_cards);
+        }
+
+        // Lida com a lógica do usuário (verifica se já existe, insere se não, etc.)
         const { data: existingUser } = await supabase
           .from('users')
           .select('id')
@@ -256,6 +267,26 @@ export default {
         this.message = `Erro ao entrar na sessão: ${error.message}`;
       }
     },
+    async fetchCards() {
+  try {
+    // A query abaixo cria o alias "backImageUrl" para o valor de backImage.asset->url
+    const query = `*[_type == "card"] | order(number asc){
+      number,
+      backTitle,
+      backContent,
+      "backImageUrl": backImage.asset->url
+    }`;
+    const result = await sanityClient.fetch(query);
+    // Mapeia o resultado para que o campo "backImage" seja a URL obtida
+    this.cards = result.map((card) => ({
+      ...card,
+      backImage: card.backImageUrl, // atribui a URL diretamente
+      flipped: false
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar os cards do Sanity:', error);
+  }
+},
     async loadConnectedUsers() {
       const { data, error } = await supabase
         .from('users')
